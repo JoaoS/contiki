@@ -17,3 +17,14 @@ and so on.
 For more information, see the Contiki website:
 
 [http://contiki-os.org](http://contiki-os.org)
+
+
+
+This version of contiki will have data replication and fusion.
+the modified files are the following:
+
+
+
+
+
+
