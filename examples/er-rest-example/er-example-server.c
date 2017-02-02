@@ -167,6 +167,34 @@ PROCESS_THREAD(er_example_server, ev, data)
 #endif
 */
 
+ /* -------------------- Riker ---------------------- */
+static struct etimer add_obs_timer;
+etimer_set(&add_obs_timer, CLOCK_SECOND*10); // set timer to add the observers
+PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&add_obs_timer));
+/* chamada para add observer */
+  static uint16_t addr_test[8];
+  //uint16_t port_test=60052;
+  uip_ipaddr_t dest_addr;
+  //const char *uri="test/hello";
+
+    addr_test[0] = 0xaaaa;
+    addr_test[4] = 0x200;
+    addr_test[5] = 0x7401;
+    addr_test[6] = 0x0000;
+    addr_test[7] = 0x0001;
+    
+    uip_ip6addr(&dest_addr, addr_test[0], addr_test[1], addr_test[2],
+    addr_test[3], addr_test[4],addr_test[5],addr_test[6],addr_test[7]);
+    
+    //printf("Calling coap_add_observer \n");
+    coap_add_observer(
+    &dest_addr, 
+    0,
+    0, 
+    0,
+    "test/hello");
+ /* -------------------- Riker ---------------------- */
+    
   /* Define application-specific events here. */
   while(1) {
     PROCESS_WAIT_EVENT();
