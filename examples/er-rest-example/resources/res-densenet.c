@@ -64,8 +64,8 @@ static int reverse(int number);
  * preferred_size and offset, but must respect the REST_MAX_CHUNK_SIZE limit for the buffer.
  * If a smaller block size is requested for CoAP, the REST framework automatically splits the data.
  */
-PERIODIC_RESOURCE(res_hello,
-         "title=\"Hello world: ?len=0..\";rt=\"Text\";obs",
+PERIODIC_RESOURCE(res_densenet,
+         "title=\"DENSENET AGGREGATION: ?len=0..\";rt=\"Text\";obs",
          res_get_handler,
          NULL,NULL,NULL,
          30*CLOCK_SECOND,
@@ -168,6 +168,6 @@ res_periodic_handler()
   /* Usually a condition is defined under with subscribers are notified, e.g., large enough delta in sensor reading. */
   if(1) {
     /* Notify the registered observers which will trigger the res_get_handler to create the response. */
-    REST.notify_subscribers(&res_hello);
+    REST.notify_subscribers(&res_densenet);
   }
 }
