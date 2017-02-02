@@ -65,6 +65,7 @@
  */
 extern resource_t
   res_hello,
+  res_densenet,
   res_mirror,
   res_chunks,
   res_separate,
