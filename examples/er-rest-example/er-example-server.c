@@ -47,6 +47,13 @@
 #include "dev/button-sensor.h"
 #endif
 
+#if DENSENET 
+#include "er-coap-observe.h"
+#include <node-id.h>
+#include "sys/etimer.h"
+#endif
+
+
 #define DEBUG 0
 #if DEBUG
 #include <stdio.h>
@@ -136,7 +143,7 @@ PROCESS_THREAD(er_example_server, ev, data)
 /*  rest_activate_resource(&res_mirror, "debug/mirror"); */
 /*  rest_activate_resource(&res_chunks, "test/chunks"); */
 /*  rest_activate_resource(&res_separate, "test/separate"); */
-  rest_activate_resource(&res_push, "test/push");
+  rest_activate_resource(&res_densenet, "test/densenet");
 /*  rest_activate_resource(&res_event, "sensors/button"); */
 /*  rest_activate_resource(&res_sub, "test/sub"); */
 /*  rest_activate_resource(&res_b1_sep_b2, "test/b1sepb2"); */
@@ -168,6 +175,7 @@ PROCESS_THREAD(er_example_server, ev, data)
 */
 
  /* -------------------- Riker ---------------------- */
+#if DENSENET
 static struct etimer add_obs_timer;
 etimer_set(&add_obs_timer, CLOCK_SECOND*10); // set timer to add the observers
 PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&add_obs_timer));
@@ -185,16 +193,12 @@ PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&add_obs_timer));
     
     uip_ip6addr(&dest_addr, addr_test[0], addr_test[1], addr_test[2],
     addr_test[3], addr_test[4],addr_test[5],addr_test[6],addr_test[7]);
-    
-    //printf("Calling coap_add_observer \n");
-    coap_add_observer(
-    &dest_addr, 
-    0,
-    0, 
-    0,
-    "test/hello");
+  
+    printf("Calling coap_add_observer \n");
+    add_observer(&dest_addr,0,0,0,"test/densenet",13);
+#endif
  /* -------------------- Riker ---------------------- */
-    
+
   /* Define application-specific events here. */
   while(1) {
     PROCESS_WAIT_EVENT();

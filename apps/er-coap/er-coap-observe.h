@@ -85,4 +85,9 @@ void coap_notify_observers_sub(resource_t *resource, const char *subpath);
 void coap_observe_handler(resource_t *resource, void *request,
                           void *response);
 
+/*For the densenet*/
+coap_observer_t *
+add_observer(uip_ipaddr_t *addr, uint16_t port, const uint8_t *token,
+             size_t token_len, const char *uri, int uri_len);
+
 #endif /* COAP_OBSERVE_H_ */

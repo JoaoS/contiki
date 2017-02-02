@@ -65,10 +65,12 @@ static int reverse(int number);
  * If a smaller block size is requested for CoAP, the REST framework automatically splits the data.
  */
 PERIODIC_RESOURCE(res_densenet,
-         "title=\"DENSENET AGGREGATION: ?len=0..\";rt=\"Text\";obs",
+         "title=\"Aggregation: ?len=0..\";rt=\"Text\";obs",
          res_get_handler,
-         NULL,NULL,NULL,
-         30*CLOCK_SECOND,
+         NULL,
+         NULL,
+         NULL,
+         35*CLOCK_SECOND,
          res_periodic_handler);
 /*20 seconds =255*/
 static void

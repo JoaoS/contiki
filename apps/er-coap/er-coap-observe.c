@@ -40,7 +40,7 @@
 #include <string.h>
 #include "er-coap-observe.h"
 
-#define DEBUG 0
+#define DEBUG 1
 #if DEBUG
 #include <stdio.h>
 #define PRINTF(...) printf(__VA_ARGS__)
@@ -58,7 +58,7 @@ LIST(observers_list);
 /*---------------------------------------------------------------------------*/
 /*- Internal API ------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
-static coap_observer_t *
+ coap_observer_t *
 add_observer(uip_ipaddr_t *addr, uint16_t port, const uint8_t *token,
              size_t token_len, const char *uri, int uri_len)
 {
@@ -230,7 +230,7 @@ coap_notify_observers_sub(resource_t *resource, const char *subpath)
       if((transaction = coap_new_transaction(coap_get_mid(), &obs->addr, obs->port))) {
         if(obs->obs_counter % COAP_OBSERVE_REFRESH_INTERVAL == 0) {
           PRINTF("           Force Confirmable for\n");
-          notification->type = COAP_TYPE_CON;
+          //notification->type = COAP_TYPE_CON;       DENSENET
         }
 
         PRINTF("           Observer ");
@@ -256,6 +256,8 @@ coap_notify_observers_sub(resource_t *resource, const char *subpath)
           coap_serialize_message(notification, transaction->packet);
 
         coap_send_transaction(transaction);
+        coap_clear_transaction(transaction);// densenet
+
       }
     }
   }
