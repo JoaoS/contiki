@@ -289,7 +289,7 @@ initialize(void)
     node_id = (eui64[1] << 8) + eui64[7];
   }
   else {
-    printf("Random EUI64 address generated\n");
+    printf("Random EUI64 address generated (Node_id=%d)\n",NODE_ID);
     eui64[0] = 0xfc; /* Atmels OUI */
     eui64[1] = 0xc2; 
     eui64[2] = 0x3d;
