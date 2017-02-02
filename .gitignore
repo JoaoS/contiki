@@ -129,3 +129,6 @@ LOG_OPENOCD
 # nRF52 build artifacts
 *.jlink
 *.nrf52dk
+
+#avr-rss2
+*.avr-rss2
