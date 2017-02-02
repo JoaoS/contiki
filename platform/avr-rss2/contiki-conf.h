@@ -45,6 +45,11 @@
 #include PROJECT_CONF_H
 #endif
 
+/*DENSENET AGGREGATION*/
+#define PLATFORM_HAS_AGGREGATION 0
+#define NODE_ID 1
+#define DEBUG_DENSENET 0
+
 /* Platform name, type, and MCU clock rate */
 #define PLATFORM_NAME  "rss2"
 #define PLATFORM_TYPE  ATMEGA256RFR2

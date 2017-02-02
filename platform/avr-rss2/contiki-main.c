@@ -122,7 +122,7 @@ rtimercycle(void)
 #endif
 #endif
 
-uint16_t node_id; /* Can be set by cooja */
+uint16_t node_id=NODE_ID; /* Can be set by cooja */
 
 uint16_t ledtimer_red, ledtimer_yellow;
 uint16_t i2c_probed; /* i2c devices we have probed */
