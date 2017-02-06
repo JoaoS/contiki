@@ -70,7 +70,7 @@ PERIODIC_RESOURCE(res_densenet,
          NULL,
          NULL,
          NULL,
-         35*CLOCK_SECOND,
+         10*CLOCK_SECOND,
          res_periodic_handler);
 /*20 seconds =255*/
 static void
