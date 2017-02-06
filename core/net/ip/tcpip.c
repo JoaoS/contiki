@@ -37,6 +37,13 @@
  * \author  Mathilde Durvy <mdurvy@cisco.com> (IPv6 related code)
  * \author  Julien Abeille <jabeille@cisco.com> (IPv6 related code)
  */
+  // densenet aggregation
+#if PLATFORM_HAS_AGGREGATION  
+#include "net/ip/agg_payloads.h"
+#include "apps/er-coap/er-coap.h"
+#include "apps/rest-engine/rest-engine.h"
+static void print_ipv6_addr(const uip_ipaddr_t *ip_addr);
+#endif
 
 #include "contiki-net.h"
 #include "net/ip/uip-split.h"
@@ -89,6 +96,9 @@ static struct etimer periodic;
 /* Timer for reassembly. */
 extern struct etimer uip_reass_timer;
 #endif
+
+// densenet, count parsed packets
+int count_parsed_pkts=0;
 
 #if UIP_TCP
 /**
@@ -203,6 +213,20 @@ packet_input(void)
 
     check_for_tcp_syn();
     uip_input();
+      /*subtil*/
+    // length between the limits and not my address
+#if PLATFORM_HAS_AGGREGATION
+  if((uip_len>55 && uip_len<=100) && !uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr) ){
+      /*
+      printf("uip_len=%d && source=",uip_len);
+      print_ipv6_addr(&UIP_IP_BUF->srcipaddr);
+      printf("\n");
+      */
+      //verifyOrigin();
+      doAggregation();
+  }
+#endif
+
     if(uip_len > 0) {
 #if UIP_CONF_TCP_SPLIT
       uip_split_output();
@@ -845,5 +869,49 @@ PROCESS_THREAD(tcpip_process, ev, data)
   }
 
   PROCESS_END();
+}
+
+
+void doAggregation(void){
+
+  #if PLATFORM_HAS_AGGREGATION   
+  /* This is a definition put in Contiki/platform/wismote/platform-conf.c. Sky motes do not have enough memory to implement Aggregation. */
+    //is my oacket uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr)
+    static coap_packet_t coap_pt[1];    //allocate space for 1 packet
+    char p1[2];
+    unsigned int begin_payload_index=UIP_IPUDPH_LEN+8;  // For some reason the forwarded packet has 8 more bytes
+    int i=0;
+    int p_size=0;
+    /*remove for second version to accept all injector nodes*/
+    uip_ip6addr_t secondnode;
+    uiplib_ip6addrconv("aaaa:0000:0000:0000:fec2:3d00:0000:0002",&secondnode);
+    /*
+    *Both forwarded packets and generated go through here
+    *First discard all self produced packets
+    *then check if the packet is from other node, if it is aggregate its payload*/
+    //if(uip_ip6addr_cmp(&UIP_IP_BUF->srcipaddr,&secondnode)){ 
+  
+    coap_parse_message(coap_pt, &uip_buf[begin_payload_index], uip_datalen());
+    //printf("Parsing: coap_code  is %d, version is %d \n", coap_pt->code,coap_pt->version);
+      
+    if(coap_pt->code==69 && coap_pt->version ==1){
+      //indicate parsing of foreign packet          
+      printf("Parsing: NBR-PKT\n");
+      p_size=sizeof(coap_pt->payload)/sizeof(coap_pt->payload[0]);
+      printf("Parsing: p_size is %d \n",p_size);
+      for(i=0;i<p_size;i=i+2){
+        p1[0] = coap_pt->payload[i]; // Get the payload value
+        p1[1] = coap_pt->payload[i+1]; // Get the payload value
+        add_payload(p1);
+      }
+          // Drop all not self-produced packets.
+      uip_len = 0;
+      uip_ext_len = 0;
+      uip_flags = 0;
+      return;
+      } 
+    //}
+
+  #endif
 }
 /*---------------------------------------------------------------------------*/
