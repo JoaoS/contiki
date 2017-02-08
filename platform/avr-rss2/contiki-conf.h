@@ -46,10 +46,11 @@
 #endif
 
 /*DENSENET AGGREGATION*/
-#define DENSENET 1
+#define DENSENET 1	/*necessary to add observer*/
 #define DEBUG_DENSENET 0
-#define PLATFORM_HAS_AGGREGATION 0
+#define PLATFORM_HAS_AGGREGATION 1
 #define NODE_ID 1
+
 
 /* Platform name, type, and MCU clock rate */
 #define PLATFORM_NAME  "rss2"

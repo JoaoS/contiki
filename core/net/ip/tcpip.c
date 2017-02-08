@@ -38,12 +38,6 @@
  * \author  Julien Abeille <jabeille@cisco.com> (IPv6 related code)
  */
   // densenet aggregation
-#if PLATFORM_HAS_AGGREGATION  
-#include "net/ip/agg_payloads.h"
-#include "apps/er-coap/er-coap.h"
-#include "apps/rest-engine/rest-engine.h"
-static void print_ipv6_addr(const uip_ipaddr_t *ip_addr);
-#endif
 
 #include "contiki-net.h"
 #include "net/ip/uip-split.h"
@@ -57,6 +51,13 @@ static void print_ipv6_addr(const uip_ipaddr_t *ip_addr);
 #if UIP_CONF_IPV6_RPL
 #include "net/rpl/rpl.h"
 #include "net/rpl/rpl-private.h"
+#endif
+
+#if PLATFORM_HAS_AGGREGATION  
+#include "net/ip/agg_payloads.h"
+#include "apps/er-coap/er-coap.h"
+#include "apps/rest-engine/rest-engine.h"
+static void print_ipv6_addr(const uip_ipaddr_t *ip_addr);
 #endif
 
 #include <string.h>
@@ -871,10 +872,9 @@ PROCESS_THREAD(tcpip_process, ev, data)
   PROCESS_END();
 }
 
-
+#if PLATFORM_HAS_AGGREGATION   
 void doAggregation(void){
 
-  #if PLATFORM_HAS_AGGREGATION   
   /* This is a definition put in Contiki/platform/wismote/platform-conf.c. Sky motes do not have enough memory to implement Aggregation. */
     //is my oacket uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr)
     static coap_packet_t coap_pt[1];    //allocate space for 1 packet
@@ -882,14 +882,6 @@ void doAggregation(void){
     unsigned int begin_payload_index=UIP_IPUDPH_LEN+8;  // For some reason the forwarded packet has 8 more bytes
     int i=0;
     int p_size=0;
-    /*remove for second version to accept all injector nodes*/
-    uip_ip6addr_t secondnode;
-    uiplib_ip6addrconv("aaaa:0000:0000:0000:fec2:3d00:0000:0002",&secondnode);
-    /*
-    *Both forwarded packets and generated go through here
-    *First discard all self produced packets
-    *then check if the packet is from other node, if it is aggregate its payload*/
-    //if(uip_ip6addr_cmp(&UIP_IP_BUF->srcipaddr,&secondnode)){ 
   
     coap_parse_message(coap_pt, &uip_buf[begin_payload_index], uip_datalen());
     //printf("Parsing: coap_code  is %d, version is %d \n", coap_pt->code,coap_pt->version);
@@ -912,6 +904,14 @@ void doAggregation(void){
       } 
     //}
 
-  #endif
 }
+static void
+print_ipv6_addr(const uip_ipaddr_t *ip_addr) {
+    int i;
+    for (i = 0; i < 16; i++) {
+        printf("%02x", ip_addr->u8[i]);
+    }
+}
+#endif
+
 /*---------------------------------------------------------------------------*/

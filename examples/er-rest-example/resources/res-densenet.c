@@ -43,19 +43,21 @@
 #include "lib/random.h"
 #include "net/ip/agg_payloads.h"
 #include <node-id.h>
+#include <math.h>
 
 /*subtil*/
 #include "sys/clock.h"
 
 
 #define MAX_N_PAYLOADS 40
-#define LEN_SINGLE_PAYLOAD 2
+#define LEN_SINGLE_PAYLOAD 4
+
 
 
 static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 static void res_periodic_handler(void);
 static int trans_count=1;
-static int reverse(int number);
+//static int reverse(int number);
 
 
 /*
@@ -70,7 +72,7 @@ PERIODIC_RESOURCE(res_densenet,
          NULL,
          NULL,
          NULL,
-         10*CLOCK_SECOND,
+         15*CLOCK_SECOND,
          res_periodic_handler);
 /*20 seconds =255*/
 static void
@@ -80,86 +82,57 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	*	This is where we set the packet payload and annex other payloads if available
 	*	first we should check if packets are available for processing, 
 	*/
-	int length=1;
-	int j=0;
-	char * value;
-	char agg[MAX_N_PAYLOADS];
+
 	int i;
+	char test[MAX_N_PAYLOADS];
+	int totalsize=0;
 	
 	#if PLATFORM_HAS_AGGREGATION
-		for(i=0,j=0;i<MAX_N_PAYLOADS;i=i+1){
-			agg[i]='\0';	
-		}
+
+		for(i=0;i<MAX_N_PAYLOADS;i=i+1){test[i]='\0';}
 
 	    #if DENSENET_DEBUG
 		printf("--- Number of payloads is %d \n",get_num_payloads());
 		#endif
 
-		for(i=0,j=0;i<get_num_payloads();i=i+1){
-			value=get_payload_char(i);
-			agg[j]=value[0];
-			j++;
-			agg[j]=value[1]; 
-			j++;
+		/**/
+		for(i=0;i<get_num_payloads();i=i+1){
+
+			if(i!=0)
+				strncpy((char *)test+totalsize,(char *)get_payload_char(i),sizeof(get_payloads(i)));
+			else
+				strncpy((char *)test,(char *)get_payload_char(i),sizeof(get_payloads(i)));
+			
+			totalsize+=sizeof(get_payloads(i));
+
 		}
-		length+=(2*get_num_payloads());
+	//printf("test=%s, size=%d\n",test,totalsize );
 	#endif
 
-	
 	/*Each message has node id + tansmission count**/
-	agg[j]=NODE_ID+'0';
-	j++;
-	int diff=j;
-	int score=trans_count;
+	test[totalsize]=NODE_ID+'0';
+	totalsize++;
+	sprintf(test+totalsize,"%d",trans_count);
+	//add size of current counter to totalsize
 
-	/*avoid eliminating the zeros iN 10, 20 etc...*/
-	if (!(score % 10==0))
-		score=reverse(trans_count);
-	
-	while(score){
-	    agg[j]= (score % 10)+'0';
-	    #if DENSENET_DEBUG
-	    printf("agg[%d]=%c\n",j,agg[j] );
-	    #endif
-	    j++;
-	    score /= 10;
-	}
-	length+=(j-diff);
+	totalsize+=log10(trans_count);	
+	totalsize++;
+	//printf("count=%d, log=%lf, size=%d\n",trans_count,log10(trans_count), totalsize );
+	printf("BEFORE TRANSMISSION COUNT=%d\nBUFFER=%s\n",trans_count,buffer);
 
+	/*clean buffer between msg results in reboots, yay!*/
+	//memset(&buffer,0,sizeof(buffer));
+	memcpy(buffer,test,totalsize*sizeof(char));
 
-	char neuf='9';
-	sprintf((char *)buffer, "%c", neuf);
-	strncpy((char*)buffer,agg,length*sizeof(char));
 	reset_payloads();
-
-	#if DENSENET_DEBUG
-	printf("Parsing:Buffer is %s, length is %d \n",buffer, length);
-	#endif
-
   	REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
- 	//REST.set_header_etag(response, (uint8_t *)&length, 1);
- 	//REST.set_response_payload(response, buffer, length);
-  	REST.set_response_payload(response, buffer, length);
-  	printf("TRANSMISSION COUNT=%d\n",trans_count);
+  	REST.set_response_payload(response, buffer, totalsize);
+  	/*This buffer print has data from other transmissions*/
+  	printf("TRANSMISSION COUNT=%d\nBUFFER=%s\n",trans_count,buffer);
   	trans_count++;
 
 
-
 }
-
-static int
-reverse(int number){
-	int  reverse = 0, rightDigit;
-	while(number != 0){
-        rightDigit = number % 10;
-        reverse = (reverse * 10) + rightDigit;
-        number = number/10;
-    }
-
-   return reverse;
-
-}
-
 
 static void
 res_periodic_handler()
