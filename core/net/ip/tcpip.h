@@ -88,6 +88,9 @@ typedef struct tcpip_uipstate uip_icmp6_appstate_t;
 #include "net/ip/uip.h"
 void tcpip_uipcall(void);
 
+#if PLATFORM_HAS_AGGREGATION   
+void doAggregation(void);
+#endif
 /**
  * \name TCP functions
  * @{

@@ -156,7 +156,7 @@ payloadConcat(char * test, int totalsize){
 
 
 		#if RES_DEBUG
-		printf("--- Number of payloads is %d \n",get_num_payloads());
+		printf("--- Number of payloads is %d---\n",get_num_payloads());
 		#endif
 		/**/
 		for(i=0;i<get_num_payloads();i=i+1){
@@ -170,7 +170,7 @@ payloadConcat(char * test, int totalsize){
 
 		}
 		#if RES_DEBUG
-		printf("MERGER: test=%s, size=%d\n",test,totalsize );
+		//printf("MERGER: test=%s, size=%d\n",test,totalsize );
 		#endif
 
 		return totalsize;
