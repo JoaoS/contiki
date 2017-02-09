@@ -51,6 +51,12 @@
 #include "net/nbr-table.h"
 #include "net/link-stats.h"
 
+/*subtil
+#if PLATFORM_HAS_AGGREGATION
+#include "net/ip/uiplib.h"
+#endif
+*/
+
 #define DEBUG DEBUG_NONE
 #include "net/ip/uip-debug.h"
 
@@ -193,6 +199,7 @@ parent_has_usable_link(rpl_parent_t *p)
   return link_metric <= MAX_LINK_METRIC;
 }
 /*---------------------------------------------------------------------------*/
+/*subtil riker*/
 static rpl_parent_t *
 best_parent(rpl_parent_t *p1, rpl_parent_t *p2)
 {
@@ -205,27 +212,87 @@ best_parent(rpl_parent_t *p1, rpl_parent_t *p2)
   p1_is_acceptable = p1 != NULL && parent_is_acceptable(p1);
   p2_is_acceptable = p2 != NULL && parent_is_acceptable(p2);
 
-  if(!p1_is_acceptable) {
-    return p2_is_acceptable ? p2 : NULL;
-  }
-  if(!p2_is_acceptable) {
-    return p1_is_acceptable ? p1 : NULL;
-  }
-
-  dag = p1->dag; /* Both parents are in the same DAG. */
-  p1_cost = parent_path_cost(p1);
-  p2_cost = parent_path_cost(p2);
-
-  /* Maintain stability of the preferred parent in case of similar ranks. */
-  if(p1 == dag->preferred_parent || p2 == dag->preferred_parent) {
-    if(p1_cost < p2_cost + PARENT_SWITCH_THRESHOLD &&
-       p1_cost > p2_cost - PARENT_SWITCH_THRESHOLD) {
-      return dag->preferred_parent;
+  // Riker This if clause force the parent to be a static one.
+  #if NODE_ID >= 2
+    if(is_the_static_nexthop(p1)){ 
+      return p1;
     }
-  }
+    else if(is_the_static_nexthop(p2)){
+      return p2;
+    }
+  #endif
+  /* end riker */
 
-  return p1_cost < p2_cost ? p1 : p2;
+  #if NODE_ID < 2
+    if(!p1_is_acceptable) {
+      return p2_is_acceptable ? p2 : NULL;
+    }
+    if(!p2_is_acceptable) {
+      return p1_is_acceptable ? p1 : NULL;
+    }
+
+    dag = p1->dag; /* Both parents are in the same DAG. */
+    p1_cost = parent_path_cost(p1);
+    p2_cost = parent_path_cost(p2);
+
+    /* Maintain stability of the preferred parent in case of similar ranks. */
+    if(p1 == dag->preferred_parent || p2 == dag->preferred_parent) {
+      if(p1_cost < p2_cost + PARENT_SWITCH_THRESHOLD &&
+         p1_cost > p2_cost - PARENT_SWITCH_THRESHOLD) {
+        return dag->preferred_parent;
+      }
+    }
+
+    return p1_cost < p2_cost ? p1 : p2;
+  #endif
 }
+/*---------------------------------------------------------------------------*/
+// Function that find out if the parent has an pre-determined address.
+// Riker
+//#if PLATFORM_HAS_AGGREGATION
+  #define PRINT6ADDR2(addr) printf("[%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x]\n", ((uint8_t *)addr)[0], ((uint8_t *)addr)[1], ((uint8_t *)addr)[2], ((uint8_t *)addr)[3], ((uint8_t *)addr)[4], ((uint8_t *)addr)[5], ((uint8_t *)addr)[6], ((uint8_t *)addr)[7], ((uint8_t *)addr)[8], ((uint8_t *)addr)[9], ((uint8_t *)addr)[10], ((uint8_t *)addr)[11], ((uint8_t *)addr)[12], ((uint8_t *)addr)[13], ((uint8_t *)addr)[14], ((uint8_t *)addr)[15])
+  int is_the_static_nexthop(rpl_parent_t *p1){
+    
+    uip_ipaddr_t static_addr;
+    static uint16_t addr_aux[8];
+    uip_ip6addr_t target;
+    uiplib_ip6addrconv("fe80:0000:0000:0000:fec2:3d00:0000:0001",&target);
+     
+     // Define here the static address
+    if(NODE_ID >= 2){
+      addr_aux[0] = 0xfe80;
+      addr_aux[1] = 0x0000;
+      addr_aux[2] = 0x0000;
+      addr_aux[3] = 0x0000;
+      addr_aux[4] = 0xfec2;
+      addr_aux[5] = 0x3d00;
+      addr_aux[6] = 0x0000;
+      addr_aux[7] = 0x0001;
+    }
+
+    uip_ip6addr(&static_addr, addr_aux[0], addr_aux[1], addr_aux[2], addr_aux[3], addr_aux[4],addr_aux[5],addr_aux[6],addr_aux[7]);
+    
+    //printf("\n\n");
+    //PRINT6ADDR2(rpl_get_parent_ipaddr(p1));
+    //printf("comparing node value=%d\n",uip_ipaddr_cmp(rpl_get_parent_ipaddr(p1), &static_addr));
+    //printf("comparing 2 node value=%d\n\n",uip_ipaddr_cmp(rpl_get_parent_ipaddr(p1), &target));
+    
+    
+    if(uip_ipaddr_cmp(rpl_get_parent_ipaddr(p1), &target)){
+      #if DEBUG_DENSENET
+      printf("Static Parent: The tested parent has the following address");
+      PRINT6ADDR2(rpl_get_parent_ipaddr(p1));
+      printf("\n");
+      #endif
+      return 1;
+    }
+
+    else return 0;
+    
+  }
+//#endif
+/*---------------------------------------------------------------------------*/
+
 /*---------------------------------------------------------------------------*/
 static rpl_dag_t *
 best_dag(rpl_dag_t *d1, rpl_dag_t *d2)

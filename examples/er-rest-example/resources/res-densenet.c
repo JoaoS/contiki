@@ -52,6 +52,7 @@
 #define MAX_N_PAYLOADS 40
 #define LEN_SINGLE_PAYLOAD 4 
 #define MAX_INT 9999
+#define RES_DEBUG 0
 
 
 
@@ -101,7 +102,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	totalsize = minPayload(test);
 	*/
 
-	#if DENSENET_DEBUG
+	#if RES_DEBUG
 	printf("test=%s, size=%d\n",test,totalsize );
 	#endif
 
@@ -126,7 +127,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
   	REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
   	REST.set_response_payload(response, buffer, totalsize);
 
-	#if DENSENET_DEBUG
+	#if RES_DEBUG
   	/*This buffer print has data from other transmissions*/
   	printf("TRANSMISSION COUNT=%d  BUFFER=%s\n",trans_count,buffer);
   	#endif
@@ -154,7 +155,7 @@ payloadConcat(char * test, int totalsize){
 		int i=0;
 
 
-		#if DENSENET_DEBUG
+		#if RES_DEBUG
 		printf("--- Number of payloads is %d \n",get_num_payloads());
 		#endif
 		/**/
@@ -168,8 +169,8 @@ payloadConcat(char * test, int totalsize){
 			totalsize+=sizeof(get_payloads(i));
 
 		}
-		#if DENSENET_DEBUG
-		printf("MERGER test=%s, size=%d\n",test,totalsize );
+		#if RES_DEBUG
+		printf("MERGER: test=%s, size=%d\n",test,totalsize );
 		#endif
 
 		return totalsize;
