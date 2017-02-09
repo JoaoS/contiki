@@ -50,13 +50,18 @@
 
 
 #define MAX_N_PAYLOADS 40
-#define LEN_SINGLE_PAYLOAD 4
+#define LEN_SINGLE_PAYLOAD 4 
+#define MAX_INT 9999
 
 
 
 static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 static void res_periodic_handler(void);
 static int trans_count=1;
+int payloadConcat(char * test, int totalsize);
+int maxPayload(char * test);
+int minPayload(char * test);
+int avgPayload(char * test);
 //static int reverse(int number);
 
 
@@ -83,31 +88,23 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	*	first we should check if packets are available for processing, 
 	*/
 
-	int i;
 	char test[MAX_N_PAYLOADS];
-	int totalsize=0;
+	int totalsize=0,i=0;
+	for(i=0;i<MAX_N_PAYLOADS;i=i+1){test[i]='\0';}
+
 	
-	#if PLATFORM_HAS_AGGREGATION
+	totalsize = payloadConcat(test, totalsize);
+	
+	/*
+	totalsize = avgPayload(test);
+	totalsize = maxPayload(test);
+	totalsize = minPayload(test);
+	*/
 
-		for(i=0;i<MAX_N_PAYLOADS;i=i+1){test[i]='\0';}
-
-	    #if DENSENET_DEBUG
-		printf("--- Number of payloads is %d \n",get_num_payloads());
-		#endif
-
-		/**/
-		for(i=0;i<get_num_payloads();i=i+1){
-
-			if(i!=0)
-				strncpy((char *)test+totalsize,(char *)get_payload_char(i),sizeof(get_payloads(i)));
-			else
-				strncpy((char *)test,(char *)get_payload_char(i),sizeof(get_payloads(i)));
-			
-			totalsize+=sizeof(get_payloads(i));
-
-		}
-	//printf("test=%s, size=%d\n",test,totalsize );
+	#if DENSENET_DEBUG
+	printf("test=%s, size=%d\n",test,totalsize );
 	#endif
+
 
 	/*Each message has node id + tansmission count**/
 	test[totalsize]=NODE_ID+'0';
@@ -115,28 +112,30 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	sprintf(test+totalsize,"%d",trans_count);
 	//add size of current counter to totalsize
 
+	/**FIXME the log 10 does not work, count digits*/
 	totalsize+=log10(trans_count);	
 	totalsize++;
 	//printf("count=%d, log=%lf, size=%d\n",trans_count,log10(trans_count), totalsize );
-	printf("BEFORE TRANSMISSION COUNT=%d\nBUFFER=%s\n",trans_count,buffer);
-
+	/*printf("BEFORE TRANSMISSION COUNT=%d\nBUFFER=%s\n",trans_count,buffer);*/
 	/*clean buffer between msg results in reboots, yay!*/
 	//memset(&buffer,0,sizeof(buffer));
 	memcpy(buffer,test,totalsize*sizeof(char));
 
+	/*reset has to be after operations to not alter values between for loops*/
 	reset_payloads();
   	REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
   	REST.set_response_payload(response, buffer, totalsize);
+
+	#if DENSENET_DEBUG
   	/*This buffer print has data from other transmissions*/
-  	printf("TRANSMISSION COUNT=%d\nBUFFER=%s\n",trans_count,buffer);
+  	printf("TRANSMISSION COUNT=%d  BUFFER=%s\n",trans_count,buffer);
+  	#endif
+
   	trans_count++;
-
-
 }
 
 static void
-res_periodic_handler()
-{
+res_periodic_handler(){
   /* Do a periodic task here, e.g., sampling a sensor. */
   //++event_counter;
 
@@ -146,3 +145,129 @@ res_periodic_handler()
     REST.notify_subscribers(&res_densenet);
   }
 }
+
+
+int 
+payloadConcat(char * test, int totalsize){
+
+	#if PLATFORM_HAS_AGGREGATION
+		int i=0;
+
+
+		#if DENSENET_DEBUG
+		printf("--- Number of payloads is %d \n",get_num_payloads());
+		#endif
+		/**/
+		for(i=0;i<get_num_payloads();i=i+1){
+
+			if(i!=0)
+				strncpy((char *)test+totalsize,(char *)get_payload_char(i),sizeof(get_payloads(i)));
+			else
+				strncpy((char *)test,(char *)get_payload_char(i),sizeof(get_payloads(i)));
+				
+			totalsize+=sizeof(get_payloads(i));
+
+		}
+		#if DENSENET_DEBUG
+		printf("MERGER test=%s, size=%d\n",test,totalsize );
+		#endif
+
+		return totalsize;
+	#endif
+}
+
+int 
+avgPayload(char * test){
+
+	int i=0;
+	unsigned int totalValues=0;
+
+	for(i=0;i<get_num_payloads();i=i+1){
+
+		totalValues+=get_payloads(i);
+		//printf("payloads=%d\n",get_payloads(i) );
+
+	}
+	totalValues=totalValues/get_num_payloads();
+	sprintf(test,"%d",totalValues);
+	//printf("AVG char=%d, size avg=%d, test=%s\n",(char*)totalValues,sizeof(totalValues),test);
+
+	/*return number of digits*/
+	return sizeof(totalValues);
+}
+
+int 
+maxPayload(char * test){
+
+	int i=0;
+	unsigned int temp=0;
+
+	for(i=0;i<get_num_payloads();i=i+1){
+
+		if(temp < get_payloads(i))
+			temp = get_payloads(i);
+
+	}
+	sprintf(test,"%d",temp);
+
+	/*return number of digits*/
+	return sizeof(temp);
+}
+
+int 
+minPayload(char * test){
+
+	int i=0;
+	unsigned int temp=MAX_INT;
+
+	for(i=0;i<get_num_payloads();i=i+1){
+
+		if(temp > get_payloads(i))
+			temp = get_payloads(i);
+
+	}
+	sprintf(test,"%d",temp);
+
+	/*return number of digits*/
+	return sizeof(temp);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*---------------------------------------------------------------------------*/

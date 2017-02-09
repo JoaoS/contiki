@@ -887,10 +887,14 @@ void doAggregation(void){
     //printf("Parsing: coap_code  is %d, version is %d \n", coap_pt->code,coap_pt->version);
       
     if(coap_pt->code==69 && coap_pt->version ==1){
-      //indicate parsing of foreign packet          
-      printf("Parsing: NBR-PKT\n");
+      //indicate parsing of foreign packet 
       p_size=sizeof(coap_pt->payload)/sizeof(coap_pt->payload[0]);
-      printf("Parsing: p_size is %d \n",p_size);
+
+      #if DEBUG_DENSENET          
+        printf("Parsing: NBR-PKT\n");
+        printf("Parsing: p_size is %d \n",p_size);
+      #endif
+
       for(i=0;i<p_size;i=i+2){
         p1[0] = coap_pt->payload[i]; // Get the payload value
         p1[1] = coap_pt->payload[i+1]; // Get the payload value
