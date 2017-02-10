@@ -46,10 +46,14 @@
 #endif
 
 /*DENSENET AGGREGATION*/
-#define DENSENET 1	/*necessary to add observer*/
-#define DEBUG_DENSENET 1
-#define PLATFORM_HAS_AGGREGATION 1
 #define NODE_ID 1
+#define DENSENET 1	/*necessary to add observer*/
+#define DEBUG_DENSENET 0
+#define PLATFORM_HAS_AGGREGATION 1
+#define LEN_SINGLE_PAYLOAD 4
+#define MAX_N_PAYLOADS 40
+
+
 
 
 /* Platform name, type, and MCU clock rate */

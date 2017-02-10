@@ -57,7 +57,8 @@
 #include "net/ip/agg_payloads.h"
 #include "apps/er-coap/er-coap.h"
 #include "apps/rest-engine/rest-engine.h"
-static void print_ipv6_addr(const uip_ipaddr_t *ip_addr);
+//static void print_ipv6_addr(const uip_ipaddr_t *ip_addr);
+#include <stdlib.h>
 #endif
 
 #include <string.h>
@@ -878,37 +879,44 @@ void doAggregation(void){
   /* This is a definition put in Contiki/platform/wismote/platform-conf.c. Sky motes do not have enough memory to implement Aggregation. */
     //is my oacket uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr)
     static coap_packet_t coap_pt[1];    //allocate space for 1 packet
-    char p1[2];
     unsigned int begin_payload_index=UIP_IPUDPH_LEN+8;  // For some reason the forwarded packet has 8 more bytes
-    int i=0;
-    int p_size=0;
-  
     coap_parse_message(coap_pt, &uip_buf[begin_payload_index], uip_datalen());
     //printf("Parsing: coap_code  is %d, version is %d \n", coap_pt->code,coap_pt->version);
       
     if(coap_pt->code==69 && coap_pt->version ==1){
-      //indicate parsing of foreign packet 
-      p_size=sizeof(coap_pt->payload)/sizeof(coap_pt->payload[0]);
+
+      /*convert payload to int to later manipulation and count digits*/
+      int number, numbuf;
+      number=atoi((char*)coap_pt->payload);
+      numbuf=number;
+
+      int digits = 0; 
+      do { 
+        number /= 10; digits++; 
+      }while (number != 0);
+
+      /*account for variable size*/
+      char pay[digits];
+    
+    
+      sprintf(pay,"%s",coap_pt->payload);
+      add_payload(pay,numbuf,digits);
 
       #if DEBUG_DENSENET          
         printf("Parsing: NBR-PKT\n");
-        printf("Parsing: p_size is %d \n",p_size);
+        printf("Payload is (%s) ,orig(%u), digits=%d, number=%d\n",pay,coap_pt->payload,digits,numbuf);
       #endif
-
-      for(i=0;i<p_size;i=i+2){
-        p1[0] = coap_pt->payload[i]; // Get the payload value
-        p1[1] = coap_pt->payload[i+1]; // Get the payload value
-        add_payload(p1);
-      }
-          // Drop all not self-produced packets.
+      
+      
+      /* Drop all not self-produced packets.*/
       uip_len = 0;
       uip_ext_len = 0;
       uip_flags = 0;
       return;
-      } 
-    //}
+    } 
 
 }
+/*
 static void
 print_ipv6_addr(const uip_ipaddr_t *ip_addr) {
     int i;
@@ -916,6 +924,9 @@ print_ipv6_addr(const uip_ipaddr_t *ip_addr) {
         printf("%02x", ip_addr->u8[i]);
     }
 }
+*/
+
+
 #endif
 
 /*---------------------------------------------------------------------------*/

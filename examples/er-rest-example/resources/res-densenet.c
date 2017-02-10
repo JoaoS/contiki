@@ -35,7 +35,7 @@
  * \author
  *      Matthias Kovatsch <kovatsch@inf.ethz.ch>
  */
-
+#include "contiki.h"
 #include <stdlib.h>
 #include <string.h>
 #include "rest-engine.h"
@@ -45,6 +45,7 @@
 #include <node-id.h>
 #include <math.h>
 
+
 /*subtil*/
 #include "sys/clock.h"
 
@@ -52,13 +53,13 @@
 #define MAX_N_PAYLOADS 40
 #define LEN_SINGLE_PAYLOAD 4 
 #define MAX_INT 9999
-#define RES_DEBUG 0
+#define RES_DEBUG 1
 
 
 
 static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 static void res_periodic_handler(void);
-static int trans_count=1;
+static int trans_count=100;
 int payloadConcat(char * test, int totalsize);
 int maxPayload(char * test);
 int minPayload(char * test);
@@ -78,7 +79,7 @@ PERIODIC_RESOURCE(res_densenet,
          NULL,
          NULL,
          NULL,
-         15*CLOCK_SECOND,
+         10*CLOCK_SECOND,
          res_periodic_handler);
 /*20 seconds =255*/
 static void
@@ -101,12 +102,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	totalsize = maxPayload(test);
 	totalsize = minPayload(test);
 	*/
-
-	#if RES_DEBUG
-	printf("test=%s, size=%d\n",test,totalsize );
-	#endif
-
-
+	
 	/*Each message has node id + tansmission count**/
 	test[totalsize]=NODE_ID+'0';
 	totalsize++;
@@ -118,7 +114,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	totalsize++;
 	//printf("count=%d, log=%lf, size=%d\n",trans_count,log10(trans_count), totalsize );
 	/*printf("BEFORE TRANSMISSION COUNT=%d\nBUFFER=%s\n",trans_count,buffer);*/
-	/*clean buffer between msg results in reboots, yay!*/
+	/*clean buffer between msg results n reboots, yay!*/
 	//memset(&buffer,0,sizeof(buffer));
 	memcpy(buffer,test,totalsize*sizeof(char));
 
@@ -127,10 +123,8 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
   	REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
   	REST.set_response_payload(response, buffer, totalsize);
 
-	#if RES_DEBUG
   	/*This buffer print has data from other transmissions*/
-  	printf("TRANSMISSION COUNT=%d  BUFFER=%s\n",trans_count,buffer);
-  	#endif
+  	printf("TRANSMISSION COUNT=%d  BUFFER=%s(%d)\n",trans_count,buffer,totalsize);
 
   	trans_count++;
 }
@@ -156,24 +150,26 @@ payloadConcat(char * test, int totalsize){
 
 
 		#if RES_DEBUG
-		printf("--- Number of payloads is %d---\n",get_num_payloads());
+		printf("--- Number of payloads is %d ---\n",get_num_payloads());
 		#endif
 		/**/
 		for(i=0;i<get_num_payloads();i=i+1){
 
 			if(i!=0)
-				strncpy((char *)test+totalsize,(char *)get_payload_char(i),sizeof(get_payloads(i)));
+				strncpy((char *)test+totalsize,(char *)get_payload_char(i),LEN_SINGLE_PAYLOAD);
 			else
-				strncpy((char *)test,(char *)get_payload_char(i),sizeof(get_payloads(i)));
-				
-			totalsize+=sizeof(get_payloads(i));
+				strncpy((char *)test,(char *)get_payload_char(i),LEN_SINGLE_PAYLOAD);
+
+			printf("paychar=%s\n",get_payload_char(i) );	
+			totalsize+=LEN_SINGLE_PAYLOAD;
 
 		}
 		#if RES_DEBUG
-		//printf("MERGER: test=%s, size=%d\n",test,totalsize );
+		printf("MERGER: test=%s, size=%d\n",test,totalsize );
 		#endif
 
 		return totalsize;
+
 	#endif
 }
 
@@ -182,11 +178,13 @@ avgPayload(char * test){
 
 	int i=0;
 	unsigned int totalValues=0;
+	int size=0;
 
 	for(i=0;i<get_num_payloads();i=i+1){
 
 		totalValues+=get_payloads(i);
 		//printf("payloads=%d\n",get_payloads(i) );
+		size=get_pay_len(i);
 
 	}
 	totalValues=totalValues/get_num_payloads();
@@ -194,7 +192,7 @@ avgPayload(char * test){
 	//printf("AVG char=%d, size avg=%d, test=%s\n",(char*)totalValues,sizeof(totalValues),test);
 
 	/*return number of digits*/
-	return sizeof(totalValues);
+	return size;
 }
 
 int 
@@ -202,17 +200,21 @@ maxPayload(char * test){
 
 	int i=0;
 	unsigned int temp=0;
+	int size=0;
+
 
 	for(i=0;i<get_num_payloads();i=i+1){
 
 		if(temp < get_payloads(i))
 			temp = get_payloads(i);
 
+		size=get_pay_len(i);
+
 	}
 	sprintf(test,"%d",temp);
 
 	/*return number of digits*/
-	return sizeof(temp);
+	return size;
 }
 
 int 
@@ -220,19 +222,23 @@ minPayload(char * test){
 
 	int i=0;
 	unsigned int temp=MAX_INT;
+	int size=0;
+
 
 	for(i=0;i<get_num_payloads();i=i+1){
 
 		if(temp > get_payloads(i))
 			temp = get_payloads(i);
 
+		size=get_pay_len(i);
+
+
 	}
 	sprintf(test,"%d",temp);
 
 	/*return number of digits*/
-	return sizeof(temp);
+	return size;
 }
-
 
 
 

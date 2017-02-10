@@ -8,18 +8,17 @@
  */
 
 
-
+#include "contiki.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define MAX_N_PAYLOADS 40
-#define LEN_SINGLE_PAYLOAD 4
 
 
 
 struct singlePayload{
 	char strContent[LEN_SINGLE_PAYLOAD];
 	unsigned int intContent;
+	int pay_len;
 };
 
 // DATA STRUCTURE
@@ -28,9 +27,7 @@ struct aggPayloads{
 	struct singlePayload singleP[MAX_N_PAYLOADS];
 	};
 
-
-static struct aggPayloads PayloadList;
-
+static struct aggPayloads PayloadList={0};
 
 
 
@@ -46,21 +43,25 @@ void reset_payloads(){
 }
 
 /**/
-void add_payload(char *content){
+void add_payload(char *content, int int_payload, int n_digits){
 			
 	strcpy(PayloadList.singleP[PayloadList.count_payloads].strContent,content);
-	PayloadList.singleP[PayloadList.count_payloads].intContent=atoi(content);
+	PayloadList.singleP[PayloadList.count_payloads].intContent=int_payload;
+	PayloadList.singleP[PayloadList.count_payloads].pay_len=n_digits;
 	
 	#if DEBUG_DENSENET
 	printf("Parsing: New payload added: int %d string %s num pay %d \n",PayloadList.singleP[PayloadList.count_payloads].intContent,PayloadList.singleP[PayloadList.count_payloads].strContent, PayloadList.count_payloads);
 	#endif
-
 	PayloadList.count_payloads=PayloadList.count_payloads+1;
 }
 
 
 unsigned int get_payloads(int payload_position){
 	return PayloadList.singleP[payload_position].intContent;
+}
+
+int get_pay_len(int payload_position){
+	return PayloadList.singleP[payload_position].pay_len;
 }
 
 char * get_payload_char(int payload_position){
@@ -73,10 +74,3 @@ int get_num_payloads(){
 	#endif
 	return PayloadList.count_payloads;
 }
-
-
-
-
-
-
-

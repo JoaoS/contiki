@@ -9,7 +9,8 @@
 struct singlePayload;
 struct aggPayloads;
 void reset_payloads();
-void add_payload(char *);
 int get_num_payloads();
 char * get_payload_char(int payload_position);
 unsigned int get_payloads(int payload_position);
+void add_payload(char *content, int int_payload, int n_digits);
+int get_pay_len(int payload_position);
