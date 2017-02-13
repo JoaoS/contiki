@@ -252,7 +252,7 @@ uint32_t longhowlong;
     ASSR |= (1 << AS2);
     TCCR2A =(1<<WGM21);
 /* Set prescaler and TIMER2 output compare register */
-#if 1    //Prescale by 1024 -   32 ticks/sec, 8 seconds max sleep
+#if 0    //Prescale by 1024 -   32 ticks/sec, 8 seconds max sleep
     TCCR2B =((1<<CS22)|(1<<CS21)|(1<<CS20));
 	longhowlong=howlong*32UL; 
 #elif 0  // Prescale by 256 -  128 ticks/sec, 2 seconds max sleep
