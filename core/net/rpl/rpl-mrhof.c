@@ -57,7 +57,7 @@
 #endif
 */
 
-#define DEBUG DEBUG_NONE
+#define DEBUG 1
 #include "net/ip/uip-debug.h"
 
 /* RFC6551 and RFC6719 do not mandate the use of a specific formula to

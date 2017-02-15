@@ -459,6 +459,12 @@ main(void)
   uip_ds6_nbr_t *nbr;
 #endif /* NETSTACK_CONF_WITH_IPV6 */
   initialize();
+  /*
+  energest_init();
+  ENERGEST_ON(ENERGEST_TYPE_CPU);
+  ENERGEST_ON(ENERGEST_TYPE_LED_GREEN);
+  */
+
 
   while(1) {
     process_run();

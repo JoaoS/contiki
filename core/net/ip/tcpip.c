@@ -218,7 +218,7 @@ packet_input(void)
       /*subtil*/
     // length between the limits and not my address
 #if PLATFORM_HAS_AGGREGATION
-  if((uip_len>55 && uip_len<=100) && !uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr) ){
+  if(!uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr) ){
       /*
       printf("uip_len=%d && source=",uip_len);
       print_ipv6_addr(&UIP_IP_BUF->srcipaddr);

@@ -53,7 +53,7 @@
 #define MAX_N_PAYLOADS 40
 #define LEN_SINGLE_PAYLOAD 4 
 #define MAX_INT 9999
-#define RES_DEBUG 1
+#define RES_DEBUG 0
 
 
 
@@ -94,9 +94,10 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	int totalsize=0,i=0;
 	for(i=0;i<MAX_N_PAYLOADS;i=i+1){test[i]='\0';}
 
-	
+	#if PLATFORM_HAS_AGGREGATION
+
 	totalsize = payloadConcat(test, totalsize);
-	
+	#endif
 	/*
 	totalsize = avgPayload(test);
 	totalsize = maxPayload(test);
@@ -145,32 +146,28 @@ res_periodic_handler(){
 int 
 payloadConcat(char * test, int totalsize){
 
-	#if PLATFORM_HAS_AGGREGATION
-		int i=0;
+	int i=0;
 
-
-		#if RES_DEBUG
-		printf("--- Number of payloads is %d ---\n",get_num_payloads());
-		#endif
-		/**/
-		for(i=0;i<get_num_payloads();i=i+1){
-
-			if(i!=0)
-				strncpy((char *)test+totalsize,(char *)get_payload_char(i),LEN_SINGLE_PAYLOAD);
-			else
-				strncpy((char *)test,(char *)get_payload_char(i),LEN_SINGLE_PAYLOAD);
-
-			printf("paychar=%s\n",get_payload_char(i) );	
-			totalsize+=LEN_SINGLE_PAYLOAD;
-
-		}
-		#if RES_DEBUG
-		printf("MERGER: test=%s, size=%d\n",test,totalsize );
-		#endif
-
-		return totalsize;
-
+	#if RES_DEBUG
+	printf("--- Number of payloads is %d ---\n",get_num_payloads());
 	#endif
+		/**/
+	for(i=0;i<get_num_payloads();i=i+1){
+
+		if(i!=0)
+			strncpy((char *)test+totalsize,(char *)get_payload_char(i),LEN_SINGLE_PAYLOAD);
+		else
+			strncpy((char *)test,(char *)get_payload_char(i),LEN_SINGLE_PAYLOAD);
+		/*printf("paychar=%s\n",get_payload_char(i) ); */
+		totalsize+=LEN_SINGLE_PAYLOAD;
+	}
+	#if RES_DEBUG
+	printf("MERGER: test=%s, size=%d\n",test,totalsize );
+	#endif
+
+	return totalsize;
+
+
 }
 
 int 
