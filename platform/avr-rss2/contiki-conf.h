@@ -52,9 +52,16 @@
 #define PLATFORM_HAS_AGGREGATION 0
 #define LEN_SINGLE_PAYLOAD 4
 #define MAX_N_PAYLOADS 40
+/*the rtimer_second value is wrong*/
+#define NEW_RTIMER_SECOND 1298
 
+/*amperage in mA, voltage is 3.3*/
+#define VOLT 3.3
+#define CPU_PWR 4.7
+#define TX_PWR 18.6
+#define RX_PWR 16.6
 
-
+/***END DENSENET***/
 
 /* Platform name, type, and MCU clock rate */
 #define PLATFORM_NAME  "rss2"
@@ -172,7 +179,7 @@ typedef unsigned short uip_stats_t;
 /* TX routine does automatic cca and optional backoffs */
 #define RDC_CONF_HARDWARE_CSMA   1
 /* Allow MCU sleeping between channel checks */
-//#define RDC_CONF_MCU_SLEEP         1
+#define RDC_CONF_MCU_SLEEP		0
 
 #if NETSTACK_CONF_WITH_IPV6
 #define LINKADDR_CONF_SIZE        8

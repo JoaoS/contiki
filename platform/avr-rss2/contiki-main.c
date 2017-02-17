@@ -91,6 +91,8 @@
 
 #include "net/rime/rime.h"
 
+
+
 /* Track interrupt flow through mac, rdc and radio driver */
 /* #define DEBUGFLOWSIZE 32 */
 #if DEBUGFLOWSIZE
@@ -257,6 +259,10 @@ initialize(void)
 
 /* rtimers needed for radio cycling */
   rtimer_init();
+
+  energest_init();
+  ENERGEST_ON(ENERGEST_TYPE_CPU);
+
 
   /* Initialize process subsystem */
   process_init();
@@ -459,16 +465,18 @@ main(void)
   uip_ds6_nbr_t *nbr;
 #endif /* NETSTACK_CONF_WITH_IPV6 */
   initialize();
-  /*
-  energest_init();
-  ENERGEST_ON(ENERGEST_TYPE_CPU);
-  ENERGEST_ON(ENERGEST_TYPE_LED_GREEN);
-  */
-
+  
+  //ENERGEST_ON(ENERGEST_TYPE_LED_GREEN);
 
   while(1) {
     process_run();
     watchdog_periodic();
+  
+    /*refresh all energest values*/
+    //energest_flush();
+    ENERGEST_OFF(ENERGEST_TYPE_CPU);
+    ENERGEST_ON(ENERGEST_TYPE_CPU);
+
 
     /* Turn off LED's */
     if(ledtimer_red) {

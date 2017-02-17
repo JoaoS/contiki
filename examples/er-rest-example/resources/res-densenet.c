@@ -44,6 +44,8 @@
 #include "net/ip/agg_payloads.h"
 #include <node-id.h>
 #include <math.h>
+#include "core/sys/energest.h"
+
 
 
 /*subtil*/
@@ -90,6 +92,27 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	*	first we should check if packets are available for processing, 
 	*/
 
+	energest_flush();
+	unsigned long cpu = energest_total_time[ENERGEST_TYPE_CPU].current/NEW_RTIMER_SECOND;
+	printf("Current CPU consumption(seconds(%lu): cpu on time=%lu current time=%lu\n\n",clock_seconds(),cpu,energest_total_time[ENERGEST_TYPE_CPU].current);
+	cpu = energest_total_time[ENERGEST_TYPE_CPU].current/RTIMER_SECOND;
+	printf("Current CPU consumption(seconds(%lu): new cpu on time=%lu current time=%lu\n\n",clock_seconds(),cpu,energest_total_time[ENERGEST_TYPE_CPU].current);
+	
+	
+	/*
+	unsigned long gled = energest_total_time[ENERGEST_TYPE_LED_GREEN].current;
+	unsigned long rx = energest_total_time[ENERGEST_TYPE_LISTEN].current;
+	unsigned long tx = energest_total_time[ENERGEST_TYPE_TRANSMIT].current;
+	*/
+		
+	/*energia= volt*amp
+	total é energia*volt*tempo
+	tempo=rtimer total/1 second rtimer	
+
+	*/
+
+
+
 	char test[MAX_N_PAYLOADS];
 	int totalsize=0,i=0;
 	for(i=0;i<MAX_N_PAYLOADS;i=i+1){test[i]='\0';}
@@ -125,8 +148,9 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
   	REST.set_response_payload(response, buffer, totalsize);
 
   	/*This buffer print has data from other transmissions*/
+  	#if RES_DEBUG
   	printf("TRANSMISSION COUNT=%d  BUFFER=%s(%d)\n",trans_count,buffer,totalsize);
-
+	#endif
   	trans_count++;
 }
 

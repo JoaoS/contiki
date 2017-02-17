@@ -49,8 +49,7 @@ PERIODIC_RESOURCE(res_push,
                   NULL,
                   NULL,
                   NULL,
-                  //5 * CLOCK_SECOND,
-                  NULL,
+                  5 * CLOCK_SECOND,
                   res_periodic_handler);
 
 /*
