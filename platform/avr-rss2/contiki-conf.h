@@ -46,7 +46,7 @@
 #endif
 
 /*DENSENET AGGREGATION*/
-#define NODE_ID 3
+#define NODE_ID 1
 #define DENSENET 1	/*necessary to add observer*/
 #define DEBUG_DENSENET 1
 #define PLATFORM_HAS_AGGREGATION 0

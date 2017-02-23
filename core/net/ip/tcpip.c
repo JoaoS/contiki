@@ -57,9 +57,10 @@
 #include "net/ip/agg_payloads.h"
 #include "apps/er-coap/er-coap.h"
 #include "apps/rest-engine/rest-engine.h"
-//static void print_ipv6_addr(const uip_ipaddr_t *ip_addr);
 #include <stdlib.h>
 #endif
+static void print_ipv6_addr(const uip_ipaddr_t *ip_addr);
+
 
 #include <string.h>
 
@@ -217,17 +218,18 @@ packet_input(void)
     uip_input();
       /*subtil*/
     // length between the limits and not my address
-#if PLATFORM_HAS_AGGREGATION
   if(!uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr) ){
       /*
       printf("uip_len=%d && source=",uip_len);
-      print_ipv6_addr(&UIP_IP_BUF->srcipaddr);
       printf("\n");
       */
+      print_ipv6_addr(&UIP_IP_BUF->srcipaddr);
       //verifyOrigin();
+      #if PLATFORM_HAS_AGGREGATION
       doAggregation();
+      #endif
+
   }
-#endif
 
     if(uip_len > 0) {
 #if UIP_CONF_TCP_SPLIT
@@ -916,17 +918,18 @@ void doAggregation(void){
     } 
 
 }
-/*
+#endif
+
 static void
 print_ipv6_addr(const uip_ipaddr_t *ip_addr) {
     int i;
     for (i = 0; i < 16; i++) {
         printf("%02x", ip_addr->u8[i]);
     }
+    printf("\n");
 }
-*/
 
 
-#endif
+
 
 /*---------------------------------------------------------------------------*/

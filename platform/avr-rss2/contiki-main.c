@@ -190,8 +190,16 @@ initialize(void)
   leds_init();
   serial_line_init();
 
+  #if NODE_ID>1
   rs232_init(RS232_PORT_1, USART_BAUD_38400, USART_PARITY_NONE | USART_STOP_BITS_1 | USART_DATA_BITS_8);
   rs232_redirect_stdout(RS232_PORT_1);
+  #endif
+  /*when testing power with */  
+  #if NODE_ID==1
+  rs232_init(RS232_PORT_0, USART_BAUD_38400, USART_PARITY_NONE | USART_STOP_BITS_1 | USART_DATA_BITS_8);
+  rs232_redirect_stdout(RS232_PORT_0);
+  #endif
+
 
 #if 0
   /* Do it my way... */
