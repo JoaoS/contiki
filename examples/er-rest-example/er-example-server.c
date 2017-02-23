@@ -177,7 +177,7 @@ PROCESS_THREAD(er_example_server, ev, data)
  /* -------------------- Riker ---------------------- */
 #if DENSENET
 static struct etimer add_obs_timer;
-etimer_set(&add_obs_timer, CLOCK_SECOND*10); // set timer to add the observers
+etimer_set(&add_obs_timer, CLOCK_SECOND*15); // set timer to add the observers
 PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&add_obs_timer));
 /* chamada para add observer */
   static uint16_t addr_test[8];

@@ -55,7 +55,7 @@
 #define MAX_N_PAYLOADS 40
 #define LEN_SINGLE_PAYLOAD 4 
 #define MAX_INT 9999
-#define RES_DEBUG 0
+#define RES_DEBUG 1
 
 
 
@@ -81,7 +81,7 @@ PERIODIC_RESOURCE(res_densenet,
          NULL,
          NULL,
          NULL,
-         10*CLOCK_SECOND,
+         15*CLOCK_SECOND,
          res_periodic_handler);
 /*20 seconds =255*/
 static void
@@ -91,13 +91,13 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	*	This is where we set the packet payload and annex other payloads if available
 	*	first we should check if packets are available for processing, 
 	*/
-
+	/*
 	energest_flush();
 	unsigned long cpu = energest_total_time[ENERGEST_TYPE_CPU].current/NEW_RTIMER_SECOND;
 	printf("Current CPU consumption(seconds(%lu): cpu on time=%lu current time=%lu\n\n",clock_seconds(),cpu,energest_total_time[ENERGEST_TYPE_CPU].current);
 	cpu = energest_total_time[ENERGEST_TYPE_CPU].current/RTIMER_SECOND;
 	printf("Current CPU consumption(seconds(%lu): new cpu on time=%lu current time=%lu\n\n",clock_seconds(),cpu,energest_total_time[ENERGEST_TYPE_CPU].current);
-	
+	*/
 	
 	/*
 	unsigned long gled = energest_total_time[ENERGEST_TYPE_LED_GREEN].current;
@@ -173,7 +173,7 @@ payloadConcat(char * test, int totalsize){
 	int i=0;
 
 	#if RES_DEBUG
-	printf("--- Number of payloads is %d ---\n",get_num_payloads());
+	//printf("--- Number of payloads is %d ---\n",get_num_payloads());
 	#endif
 		/**/
 	for(i=0;i<get_num_payloads();i=i+1){
@@ -186,7 +186,7 @@ payloadConcat(char * test, int totalsize){
 		totalsize+=LEN_SINGLE_PAYLOAD;
 	}
 	#if RES_DEBUG
-	printf("MERGER: test=%s, size=%d\n",test,totalsize );
+	//printf("MERGER: test=%s, size=%d\n",test,totalsize );
 	#endif
 
 	return totalsize;

@@ -262,6 +262,8 @@ initialize(void)
 
   energest_init();
   ENERGEST_ON(ENERGEST_TYPE_CPU);
+  ENERGEST_ON(ENERGEST_TYPE_LED_GREEN);
+
 
 
   /* Initialize process subsystem */

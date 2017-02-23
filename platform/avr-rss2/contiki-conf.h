@@ -46,9 +46,9 @@
 #endif
 
 /*DENSENET AGGREGATION*/
-#define NODE_ID 1
+#define NODE_ID 3
 #define DENSENET 1	/*necessary to add observer*/
-#define DEBUG_DENSENET 0
+#define DEBUG_DENSENET 1
 #define PLATFORM_HAS_AGGREGATION 0
 #define LEN_SINGLE_PAYLOAD 4
 #define MAX_N_PAYLOADS 40
