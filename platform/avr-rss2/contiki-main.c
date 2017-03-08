@@ -273,8 +273,6 @@ initialize(void)
   ENERGEST_ON(ENERGEST_TYPE_CPU);
   //ENERGEST_ON(ENERGEST_TYPE_LED_GREEN);
 
-
-
   /* Initialize process subsystem */
   process_init();
 
@@ -476,7 +474,6 @@ main(void)
   uip_ds6_nbr_t *nbr;
 #endif /* NETSTACK_CONF_WITH_IPV6 */
   energest_init();
-
   initialize();
   
   //ENERGEST_ON(ENERGEST_TYPE_LED_GREEN);
@@ -487,8 +484,8 @@ main(void)
   
     /*refresh all energest values*/
     //energest_flush();
-    ENERGEST_OFF(ENERGEST_TYPE_CPU);
-    ENERGEST_ON(ENERGEST_TYPE_CPU);
+    //ENERGEST_OFF(ENERGEST_TYPE_CPU);
+    //ENERGEST_ON(ENERGEST_TYPE_CPU);
 
 
     /* Turn off LED's */

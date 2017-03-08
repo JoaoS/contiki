@@ -66,7 +66,7 @@
 #endif
 
 #include <stdint.h>
-/*
+
 #ifndef NETSTACK_CONF_MAC
 #define NETSTACK_CONF_MAC     csma_driver
 #endif
@@ -74,7 +74,8 @@
 #ifndef NETSTACK_CONF_RDC
 #define NETSTACK_CONF_RDC     contikimac_driver
 #endif
-*/
+
+
 #ifndef NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE
 #define NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE 8
 #endif
@@ -86,11 +87,12 @@
 #define NETSTACK_CONF_FRAMER  framer_802154
 #endif
 #endif
-/*
+
+
 #ifndef NETSTACK_CONF_RADIO
 #define NETSTACK_CONF_RADIO   rf230_driver
 #endif
-*/
+
 
 #ifndef CHANNEL_802_15_4
 #define CHANNEL_802_15_4      26

@@ -85,7 +85,7 @@ PROCESS_THREAD(clock_test_process, ev, data)
 {
   PROCESS_BEGIN();
 #ifdef CONTIKI_TARGET_AVR_RSS2
-  stop_avr_wdt();
+  //stop_avr_wdt();
 #endif
   leds_init();
 
@@ -172,7 +172,7 @@ PROCESS_THREAD(clock_test_process, ev, data)
   printf("Clock seconds test (2s):\n");
   i = 0;
   while(i < 11) {
-    etimer_set(&et, 2*CLOCK_SECOND);
+    etimer_set(&et, 2* CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     etimer_reset(&et);
     sec = clock_seconds();
