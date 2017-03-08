@@ -43,7 +43,6 @@
 #include "lib/random.h"
 #include "net/netstack.h"
 #include "net/mac/frame802154.h"
-#include "dev/button-sensor.h"
 #include "dev/adxl345.h"
 #include "sys/clock.h"
 
@@ -57,12 +56,6 @@
 #include "cfs-coffee-arch.h"
 #include "cfs/cfs-coffee.h"
 #include "sys/autostart.h"
-
-#include "dev/battery-sensor.h"
-#include "dev/button-sensor.h"
-#include "dev/sht11/sht11-sensor.h"
-
-SENSORS(&button_sensor);
 
 extern unsigned char node_mac[8];
 
@@ -284,7 +277,7 @@ main(int argc, char **argv)
   set_rime_addr();
 
   cc2420_init();
-  accm_init();
+  SENSORS_ACTIVATE(adxl345);
 
   {
     uint8_t longaddr[8];
@@ -325,10 +318,11 @@ main(int argc, char **argv)
 
   NETSTACK_RDC.init();
   NETSTACK_MAC.init();
+  NETSTACK_LLSEC.init();
   NETSTACK_NETWORK.init();
 
-  printf("%s %s, channel check rate %lu Hz, radio channel %u\n",
-         NETSTACK_MAC.name, NETSTACK_RDC.name,
+  printf("%s %s %s, channel check rate %lu Hz, radio channel %u\n",
+         NETSTACK_LLSEC.name, NETSTACK_MAC.name, NETSTACK_RDC.name,
          CLOCK_SECOND / (NETSTACK_RDC.channel_check_interval() == 0 ? 1 :
                          NETSTACK_RDC.channel_check_interval()),
          CC2420_CONF_CHANNEL);
@@ -366,10 +360,11 @@ main(int argc, char **argv)
 
   NETSTACK_RDC.init();
   NETSTACK_MAC.init();
+  NETSTACK_LLSEC.init();
   NETSTACK_NETWORK.init();
 
-  printf("%s %s, channel check rate %lu Hz, radio channel %u\n",
-         NETSTACK_MAC.name, NETSTACK_RDC.name,
+  printf("%s %s %s, channel check rate %lu Hz, radio channel %u\n",
+         NETSTACK_LLSEC.name, NETSTACK_MAC.name, NETSTACK_RDC.name,
          CLOCK_SECOND / (NETSTACK_RDC.channel_check_interval() == 0 ? 1 :
                          NETSTACK_RDC.channel_check_interval()),
          CC2420_CONF_CHANNEL);
