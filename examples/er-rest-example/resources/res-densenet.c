@@ -81,7 +81,7 @@ PERIODIC_RESOURCE(res_densenet,
          NULL,
          NULL,
          NULL,
-         15*CLOCK_SECOND,
+         30*CLOCK_SECOND,
          res_periodic_handler);
 /*20 seconds =255*/
 static void
@@ -108,11 +108,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	/*energia= volt*amp
 	total é energia*volt*tempo
 	tempo=rtimer total/1 second rtimer	
-
 	*/
-
-
-
 	char test[MAX_N_PAYLOADS];
 	int totalsize=0,i=0;
 	for(i=0;i<MAX_N_PAYLOADS;i=i+1){test[i]='\0';}
@@ -173,7 +169,7 @@ payloadConcat(char * test, int totalsize){
 	int i=0;
 
 	#if RES_DEBUG
-	//printf("--- Number of payloads is %d ---\n",get_num_payloads());
+	printf("--- Number of payloads is %d ---\n",get_num_payloads());
 	#endif
 		/**/
 	for(i=0;i<get_num_payloads();i=i+1){

@@ -50,7 +50,7 @@ void add_payload(char *content, int int_payload, int n_digits){
 	PayloadList.singleP[PayloadList.count_payloads].pay_len=n_digits;
 	
 	#if DEBUG_DENSENET
-	printf("Parsing: New payload added: int %u string %s num pay %d \n",PayloadList.singleP[PayloadList.count_payloads].intContent,PayloadList.singleP[PayloadList.count_payloads].strContent, PayloadList.count_payloads);
+	//printf("Parsing: New payload added: int %u string %s num pay %d \n",PayloadList.singleP[PayloadList.count_payloads].intContent,PayloadList.singleP[PayloadList.count_payloads].strContent, PayloadList.count_payloads);
 	#endif
 	PayloadList.count_payloads=PayloadList.count_payloads+1;
 }
@@ -70,7 +70,7 @@ char * get_payload_char(int payload_position){
 
 int get_num_payloads(){
 	#if DEBUG_DENSENET
-	printf("Parsing: Number of agg message %d \n",PayloadList.count_payloads);
+	//printf("Parsing: Number of agg message %d \n",PayloadList.count_payloads);
 	#endif
 	return PayloadList.count_payloads;
 }

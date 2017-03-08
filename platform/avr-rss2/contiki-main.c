@@ -67,6 +67,8 @@
 #include "net/ipv6/sicslowpan.h"
 
 #include "contiki.h"
+unsigned long global_total_trans=0;
+
 #include "contiki-net.h"
 #include "contiki-lib.h"
 
@@ -125,6 +127,7 @@ rtimercycle(void)
 #endif
 
 uint16_t node_id=NODE_ID; /* Can be set by cooja */
+int stopFlag=1;
 
 uint16_t ledtimer_red, ledtimer_yellow;
 uint16_t i2c_probed; /* i2c devices we have probed */
@@ -267,10 +270,8 @@ initialize(void)
 
 /* rtimers needed for radio cycling */
   rtimer_init();
-
-  energest_init();
   ENERGEST_ON(ENERGEST_TYPE_CPU);
-  ENERGEST_ON(ENERGEST_TYPE_LED_GREEN);
+  //ENERGEST_ON(ENERGEST_TYPE_LED_GREEN);
 
 
 
@@ -474,6 +475,8 @@ main(void)
 #if NETSTACK_CONF_WITH_IPV6
   uip_ds6_nbr_t *nbr;
 #endif /* NETSTACK_CONF_WITH_IPV6 */
+  energest_init();
+
   initialize();
   
   //ENERGEST_ON(ENERGEST_TYPE_LED_GREEN);
@@ -550,9 +553,21 @@ main(void)
 
 #if STAMPS
       if((clocktime % STAMPS) == 0) {
+#if WARMUP_DISCARD     /*discard previous warmup measurements in Energest, only once*/
+        if (stopFlag){
+          if((clocktime % WARMUP_DISCARD)==0){
+            /*printf("Reset Energest\n");*/
+            energest_init();
+            global_total_trans=0;
+            stopFlag=0;
+          }
+        }
+        
+#endif
 #if ENERGEST_CONF_ON
 #include "lib/print-stats.h"
         print_stats();
+
 #elif RADIOSTATS
         extern volatile unsigned long radioontime;
         PRINTF("%u(%u)s\n", clocktime, radioontime);

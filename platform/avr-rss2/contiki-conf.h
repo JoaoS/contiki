@@ -46,20 +46,15 @@
 #endif
 
 /*DENSENET AGGREGATION*/
-#define NODE_ID 1
+#define NODE_ID 1 /*if node =1 the output is sent to uart0 in contiki-main*/
 #define DENSENET 1	/*necessary to add observer*/
 #define DEBUG_DENSENET 1
 #define PLATFORM_HAS_AGGREGATION 0
 #define LEN_SINGLE_PAYLOAD 4
 #define MAX_N_PAYLOADS 40
 /*the rtimer_second value is wrong*/
-#define NEW_RTIMER_SECOND 1298
+#define WARMUP_DISCARD 180 /*discard first x seconds from energest*/
 
-/*amperage in mA, voltage is 3.3*/
-#define VOLT 3.3
-#define CPU_PWR 4.7
-#define TX_PWR 18.6
-#define RX_PWR 16.6
 
 /***END DENSENET***/
 
@@ -71,7 +66,7 @@
 #endif
 
 #include <stdint.h>
-
+/*
 #ifndef NETSTACK_CONF_MAC
 #define NETSTACK_CONF_MAC     csma_driver
 #endif
@@ -79,7 +74,7 @@
 #ifndef NETSTACK_CONF_RDC
 #define NETSTACK_CONF_RDC     contikimac_driver
 #endif
-
+*/
 #ifndef NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE
 #define NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE 8
 #endif
@@ -91,10 +86,11 @@
 #define NETSTACK_CONF_FRAMER  framer_802154
 #endif
 #endif
-
+/*
 #ifndef NETSTACK_CONF_RADIO
 #define NETSTACK_CONF_RADIO   rf230_driver
 #endif
+*/
 
 #ifndef CHANNEL_802_15_4
 #define CHANNEL_802_15_4      26

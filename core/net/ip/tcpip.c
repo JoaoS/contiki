@@ -59,8 +59,8 @@
 #include "apps/rest-engine/rest-engine.h"
 #include <stdlib.h>
 #endif
-static void print_ipv6_addr(const uip_ipaddr_t *ip_addr);
-
+//static void print_ipv6_addr(const uip_ipaddr_t *ip_addr);
+int totalnode2=0, totalnode3=0; 
 
 #include <string.h>
 
@@ -218,12 +218,34 @@ packet_input(void)
     uip_input();
       /*subtil*/
     // length between the limits and not my address
-  if(!uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr) ){
+  if((uip_len>55 && uip_len<=100) && !uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr) ){
       /*
       printf("uip_len=%d && source=",uip_len);
       printf("\n");
-      */
       print_ipv6_addr(&UIP_IP_BUF->srcipaddr);
+      */
+      /*comment bellow when aggrregating, the code is to much and reboots the node*/
+    /*
+      uip_ip6addr_t target2, target3;
+      uiplib_ip6addrconv("aaaa:0000:0000:0000:fec2:3d00:0000:0002",&target2);
+      uiplib_ip6addrconv("aaaa:0000:0000:0000:fec2:3d00:0000:0003",&target3);
+
+      
+      if(uip_ipaddr_cmp(&target2,&UIP_IP_BUF->srcipaddr)){
+        totalnode2++;
+        if (totalnode2 > 20){
+          printf("NODE 2 sent a message(%d)\n",totalnode2);
+        }
+      }
+      if(uip_ipaddr_cmp(&target3,&UIP_IP_BUF->srcipaddr)){
+        totalnode3++;
+        if (totalnode3 > 20){
+          printf("NODE 3 sent a message(%d)\n",totalnode3);
+        }
+      }
+      */
+      
+      
       //verifyOrigin();
       #if PLATFORM_HAS_AGGREGATION
       doAggregation();
@@ -905,10 +927,8 @@ void doAggregation(void){
       add_payload(pay,numbuf,digits);
 
       #if DEBUG_DENSENET          
-        printf("Parsing: NBR-PKT\n");
-        printf("Payload is (%s) ,orig(%u), digits=%d, number=%d\n",pay,coap_pt->payload,digits,numbuf);
+       // printf("Parsing: NBR-PKT\n");
       #endif
-      
       
       /* Drop all not self-produced packets.*/
       uip_len = 0;
@@ -919,7 +939,7 @@ void doAggregation(void){
 
 }
 #endif
-
+/*
 static void
 print_ipv6_addr(const uip_ipaddr_t *ip_addr) {
     int i;
@@ -928,7 +948,7 @@ print_ipv6_addr(const uip_ipaddr_t *ip_addr) {
     }
     printf("\n");
 }
-
+*/
 
 
 
