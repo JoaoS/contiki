@@ -61,7 +61,7 @@
 /* Platform name, type, and MCU clock rate */
 #define PLATFORM_NAME  "rss2"
 #define PLATFORM_TYPE  ATMEGA256RFR2
-#ifndef F_CPU
+#undef F_CPU
 #define F_CPU          8000000UL
 #endif
 

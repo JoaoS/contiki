@@ -97,7 +97,7 @@ PROCESS_THREAD(clock_test_process, ev, data)
   printf("sizeof rtimer_clock_t = %d\n", sizeof(rtimer_clock_t));
   printf("sizeof clock_time_t = %d\n", sizeof(clock_time_t));
 
-  printf("CLOCK_SECOND=%d\n", CLOCK_SECOND);
+  printf("Prescaling=%lu, fcpu=%lu, prescaler=%lu\n", F_CPU/RTIMER_ARCH_PRESCALER,F_CPU,RTIMER_ARCH_PRESCALER);
   printf("RTIMER_ARCH_SECOND = (%lu rtimer ticks):\n", RTIMER_ARCH_SECOND);
 
 
@@ -172,7 +172,7 @@ PROCESS_THREAD(clock_test_process, ev, data)
   printf("Clock seconds test (2s):\n");
   i = 0;
   while(i < 11) {
-    etimer_set(&et, 2* CLOCK_SECOND);
+    etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     etimer_reset(&et);
     sec = clock_seconds();

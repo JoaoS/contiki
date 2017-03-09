@@ -270,7 +270,7 @@ initialize(void)
 
 /* rtimers needed for radio cycling */
   rtimer_init();
-  ENERGEST_ON(ENERGEST_TYPE_CPU);
+//  ENERGEST_ON(ENERGEST_TYPE_CPU);
   //ENERGEST_ON(ENERGEST_TYPE_LED_GREEN);
 
   /* Initialize process subsystem */
@@ -473,10 +473,12 @@ main(void)
 #if NETSTACK_CONF_WITH_IPV6
   uip_ds6_nbr_t *nbr;
 #endif /* NETSTACK_CONF_WITH_IPV6 */
-  energest_init();
   initialize();
   
-  //ENERGEST_ON(ENERGEST_TYPE_LED_GREEN);
+  //ENERGEST_ON(ENERGEST_TYPE_LED_GREEN)
+  energest_init();
+  ENERGEST_ON(ENERGEST_TYPE_CPU);
+
 
   while(1) {
     process_run();
@@ -484,9 +486,10 @@ main(void)
   
     /*refresh all energest values*/
     //energest_flush();
-    //ENERGEST_OFF(ENERGEST_TYPE_CPU);
-    //ENERGEST_ON(ENERGEST_TYPE_CPU);
-
+    /*
+    ENERGEST_OFF(ENERGEST_TYPE_CPU);
+    ENERGEST_ON(ENERGEST_TYPE_CPU);
+    */
 
     /* Turn off LED's */
     if(ledtimer_red) {
@@ -547,6 +550,14 @@ main(void)
     if(clocktime != clock_seconds()) {
       clocktime = clock_seconds();
 #endif
+
+  if((clocktime % 5)==0){
+    printf("update Energest\n");
+    ENERGEST_OFF(ENERGEST_TYPE_CPU);
+    int i=0;
+    for ( i = 0; i < 20; ++i){}
+    ENERGEST_ON(ENERGEST_TYPE_CPU);
+  }
 
 #if STAMPS
       if((clocktime % STAMPS) == 0) {
