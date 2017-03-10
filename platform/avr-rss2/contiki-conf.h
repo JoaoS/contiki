@@ -54,6 +54,7 @@
 #define MAX_N_PAYLOADS 40
 /*the rtimer_second value is wrong*/
 #define WARMUP_DISCARD 180 /*discard first x seconds from energest*/
+#define ENERGEST_UPDATE 5 /*time interval that takes the platform to update the energest values, rtimer_second 7812 (timeout at 8 seconds)*/
 
 
 /***END DENSENET***/
@@ -63,7 +64,6 @@
 #define PLATFORM_TYPE  ATMEGA256RFR2
 #undef F_CPU
 #define F_CPU          8000000UL
-#endif
 
 #include <stdint.h>
 
