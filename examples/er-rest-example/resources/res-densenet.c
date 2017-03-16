@@ -92,7 +92,6 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	*	first we should check if packets are available for processing, 
 	*/
 	/*
-	energest_flush();
 	unsigned long cpu = energest_total_time[ENERGEST_TYPE_CPU].current/NEW_RTIMER_SECOND;
 	printf("Current CPU consumption(seconds(%lu): cpu on time=%lu current time=%lu\n\n",clock_seconds(),cpu,energest_total_time[ENERGEST_TYPE_CPU].current);
 	cpu = energest_total_time[ENERGEST_TYPE_CPU].current/RTIMER_SECOND;

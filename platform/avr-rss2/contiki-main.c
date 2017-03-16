@@ -479,6 +479,8 @@ main(void)
   //ENERGEST_ON(ENERGEST_TYPE_LED_GREEN)
   energest_init();
   ENERGEST_ON(ENERGEST_TYPE_CPU);
+  //printf("rtimer now 0 =%u, comp(%u)\n",RTIMER_NOW(),energest_current_time[ENERGEST_TYPE_SERIAL] );
+
 
 
   while(1) {
@@ -547,10 +549,12 @@ main(void)
 #endif
 /*this function updates the CPU value in ENERGEST_UPDATE intervals  */
   if((clocktime % ENERGEST_UPDATE)==0){
-    ENERGEST_OFF(ENERGEST_TYPE_CPU);
-    int i=0;
-    for ( i = 0; i < 20; ++i){}
-    ENERGEST_ON(ENERGEST_TYPE_CPU);
+
+  ENERGEST_OFF(ENERGEST_TYPE_CPU);
+
+  ENERGEST_ON(ENERGEST_TYPE_CPU);
+   
+
   }
 
 #if STAMPS

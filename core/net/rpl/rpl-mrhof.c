@@ -213,7 +213,7 @@ best_parent(rpl_parent_t *p1, rpl_parent_t *p2)
   p2_is_acceptable = p2 != NULL && parent_is_acceptable(p2);
 
   // Riker This if clause force the parent to be a static one.
-  #if NODE_ID >= 2
+  #if NODE_ID >= 6
     if(is_the_static_nexthop(p1)){ 
       return p1;
     }
@@ -223,7 +223,7 @@ best_parent(rpl_parent_t *p1, rpl_parent_t *p2)
   #endif
   /* end riker */
 
-  #if NODE_ID < 2
+  #if NODE_ID < 6
     if(!p1_is_acceptable) {
       return p2_is_acceptable ? p2 : NULL;
     }

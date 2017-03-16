@@ -76,28 +76,49 @@ void energest_type_set(int type, unsigned long value);
 void energest_flush(void);
 
 #if ENERGEST_CONF_ON
-/*extern int energest_total_count;*/
+extern unsigned short NEW_energest_current_time[ENERGEST_TYPE_MAX];
+extern rtimer_clock_t current_rtimer;
+#define RESTART_VALUE 65535 /*16 bit timer register*/
+extern int totalSec;
+extern unsigned long diff;
+
 extern energest_t energest_total_time[ENERGEST_TYPE_MAX];
-extern rtimer_clock_t energest_current_time[ENERGEST_TYPE_MAX];
+extern unsigned short energest_current_time[ENERGEST_TYPE_MAX];
 extern unsigned char energest_current_mode[ENERGEST_TYPE_MAX];
 
 #ifdef ENERGEST_CONF_LEVELDEVICE_LEVELS
 extern energest_t energest_leveldevice_current_leveltime[ENERGEST_CONF_LEVELDEVICE_LEVELS];
 #endif
 
+extern unsigned short flag;
 #define ENERGEST_ON(type)  do { \
-                           /*++energest_total_count;*/ \
-                           energest_current_time[type] = RTIMER_NOW(); \
-			   energest_current_mode[type] = 1; \
-                           } while(0)
+                          NEW_energest_current_time[type] = RTIMER_NOW(); \
+                          if (type==ENERGEST_TYPE_SERIAL) flag=NEW_energest_current_time[type];/*printf("Novo relogio =%u\n",NEW_energest_current_time[type]);*/  \
+                          /*/energest_current_time[type] = RTIMER_NOW();*/ \
+			                    energest_current_mode[type] = 1; \
+                          } while(0) 
 #ifdef __AVR__
-/* Handle 16 bit rtimer wraparound */
-#define ENERGEST_OFF(type) if(energest_current_mode[type] != 0) do {	\
-							if (RTIMER_NOW() < energest_current_time[type]) energest_total_time[type].current += RTIMER_ARCH_SECOND; \
-							energest_total_time[type].current += (rtimer_clock_t)(RTIMER_NOW() - \
-							energest_current_time[type]); \
-							energest_current_mode[type] = 0; \
-                           } while(0)
+/* Handle 16 bit rtimer wraparound */                        
+ 
+#define ENERGEST_OFF(type) if(energest_current_mode[type]) do {  \
+          diff=energest_total_time[type].current;  \
+          current_rtimer=RTIMER_NOW(); \
+          if (current_rtimer < NEW_energest_current_time[type]){ \
+              flag=(rtimer_clock_t) (RESTART_VALUE - NEW_energest_current_time[type] + current_rtimer );  \
+              energest_total_time[type].current +=  flag; \
+          } \
+          else {  \
+              flag=(rtimer_clock_t)(current_rtimer - NEW_energest_current_time[type]);  \
+              energest_total_time[type].current += flag;  \
+          } \
+          energest_current_mode[type] = 0; \
+          current_rtimer=0; \
+          if (type==ENERGEST_TYPE_SERIAL) printf("added ticks=%u, a mais=%lu\n",flag,flag-(RTIMER_ARCH_SECOND*ENERGEST_UPDATE) ); \
+          flag=0; \
+          } while(0)       
+
+
+
 
 #define ENERGEST_OFF_LEVEL(type,level) do { \
 										if (RTIMER_NOW() < energest_current_time[type]) energest_total_time[type].current += RTIMER_ARCH_SECOND; \
@@ -144,6 +165,7 @@ extern energest_t energest_leveldevice_current_leveltime[ENERGEST_CONF_LEVELDEVI
                                              energest_current_mode[type_on] = 1; \
                                            } while(0)
 #endif
+
 
 #else /* ENERGEST_CONF_ON */
 #define ENERGEST_ON(type) do { } while(0)
