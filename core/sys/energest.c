@@ -41,8 +41,7 @@
 #include "contiki-conf.h"
 
 #if ENERGEST_CONF_ON
-rtimer_clock_t  current_rtimer;
-int totalSec;
+rtimer_clock_t  now;
 unsigned short NEW_energest_current_time[ENERGEST_TYPE_MAX];
 energest_t energest_total_time[ENERGEST_TYPE_MAX];
 unsigned short energest_current_time[ENERGEST_TYPE_MAX];
@@ -50,23 +49,18 @@ unsigned short energest_current_time[ENERGEST_TYPE_MAX];
 energest_t energest_leveldevice_current_leveltime[ENERGEST_CONF_LEVELDEVICE_LEVELS];
 #endif
 unsigned char energest_current_mode[ENERGEST_TYPE_MAX];
-unsigned long diff;
-unsigned short flag;
+
 
 
 /*---------------------------------------------------------------------------*/
 void
 energest_init(void)
 {
-  totalSec=0;
   int i;
   for(i = 0; i < ENERGEST_TYPE_MAX; ++i) {
-    energest_total_time[i].current = 0;
-    energest_current_time[i] = 0;
+    energest_total_time[i].current = energest_current_time[i] = 0;
     energest_current_mode[i] = 0;
     NEW_energest_current_time[i]=0;
-    diff=0;
-
   }
 #ifdef ENERGEST_CONF_LEVELDEVICE_LEVELS
   for(i = 0; i < ENERGEST_CONF_LEVELDEVICE_LEVELS; ++i) {
@@ -116,8 +110,18 @@ energest_flush(void)
   for(i = 0; i < ENERGEST_TYPE_MAX; i++) {
     if(energest_current_mode[i]) {
       now = RTIMER_NOW();
-      energest_total_time[i].current += (rtimer_clock_t)
-	(now - energest_current_time[i]);
+      //account for 16 bit wraparound in rtimer
+      #ifdef __AVR__
+        if (now < NEW_energest_current_time[i]){
+          energest_total_time[i].current += (rtimer_clock_t) (RESTART_VALUE - NEW_energest_current_time[i] + now );
+        }
+        else 
+          energest_total_time[i].current += (rtimer_clock_t)(now - NEW_energest_current_time[i]);
+
+      #else
+        energest_total_time[i].current += (rtimer_clock_t)(now - NEW_energest_current_time[i]);
+      
+      #endif
       energest_current_time[i] = now;
     }
   }

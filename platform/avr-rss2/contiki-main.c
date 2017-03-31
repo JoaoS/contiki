@@ -68,6 +68,7 @@
 
 #include "contiki.h"
 unsigned long global_total_trans=0;
+unsigned long totalpower, cpu, tx, rx;
 
 #include "contiki-net.h"
 #include "contiki-lib.h"
@@ -568,6 +569,20 @@ main(void)
             stopFlag=0;
           }
         }
+        else{
+          /*/energest_value*current*voltage)/(rtimer_second*runtime)*/
+          totalpower=0;
+          cpu=0;
+          tx=0;
+          rx=0;
+          /*current corresponds to mA*/
+          cpu = (unsigned long)(energest_total_time[ENERGEST_TYPE_CPU].current*9.32*3.3)/RTIMER_ARCH_SECOND;
+          rx =  (unsigned long)(energest_total_time[ENERGEST_TYPE_LISTEN].current*15.49*3.3)/RTIMER_ARCH_SECOND;
+          tx =  (unsigned long)(energest_total_time[ENERGEST_TYPE_TRANSMIT].current*21.44*3.3)/RTIMER_ARCH_SECOND;
+          totalpower=cpu+rx+tx;
+          printf("cpu=%lu, rx=%lu, tx=%lu totalpower=%lu\n",(unsigned long)(energest_total_time[ENERGEST_TYPE_CPU].current*9*3.3)/RTIMER_ARCH_SECOND, (unsigned long)(energest_total_time[ENERGEST_TYPE_LISTEN].current*17.87*3.3)/RTIMER_ARCH_SECOND, (unsigned long)(energest_total_time[ENERGEST_TYPE_TRANSMIT].current*21.6*3.3)/RTIMER_ARCH_SECOND,totalpower );
+
+        }      
         
 #endif
 #if ENERGEST_CONF_ON

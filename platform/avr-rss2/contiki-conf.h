@@ -46,15 +46,15 @@
 #endif
 
 /*DENSENET AGGREGATION*/
-#define NODE_ID 5 /*if node =1 the output is sent to uart0 in contiki-main*/
+#define NODE_ID 1 /*if node =1 the output is sent to uart0 in contiki-main*/
 #define DENSENET 1	/*necessary to add observer*/
-#define DEBUG_DENSENET 1
+#define DEBUG_DENSENET 0
 #define PLATFORM_HAS_AGGREGATION 0
 #define LEN_SINGLE_PAYLOAD 4
 #define MAX_N_PAYLOADS 40
-/*the rtimer_second value is wrong*/
+
 #define WARMUP_DISCARD 180 /*discard first x seconds from energest*/
-#define ENERGEST_UPDATE 1 /*time interval that takes the platform to update the energest values, rtimer_second 7812 (timeout at 8 seconds)*/
+#define ENERGEST_UPDATE 4 /*time interval that takes the platform to update the energest values, rtimer_second 7812 (timeout at 8 seconds)*/
 
 
 /***END DENSENET***/
