@@ -14,18 +14,17 @@
 #include <string.h>
 
 
-
+/*data from received payload*/
 struct singlePayload{
-	char strContent[LEN_SINGLE_PAYLOAD];
-	unsigned int intContent;
-	int pay_len;
+	unsigned int payload;
+
 };
 
-// DATA STRUCTURE
+/*array of payloads to send*/
 struct aggPayloads{
-	int count_payloads;
-	struct singlePayload singleP[MAX_N_PAYLOADS];
-	};
+	int count_payloads;	/*total number of received*/
+	struct singlePayload singleP[MAX_N_PAYLOADS];	/*space for each packet*/
+};
 
 static struct aggPayloads PayloadList={0};
 
@@ -35,42 +34,33 @@ static struct aggPayloads PayloadList={0};
 void reset_payloads(){
 	int i;
 	for(i=0;i<PayloadList.count_payloads; i=i+1){
-		strcpy(PayloadList.singleP[i].strContent,"\n");
-		PayloadList.singleP[i].intContent=0;
+		PayloadList.singleP[i].payload=0;
 	}
 	PayloadList.count_payloads=0;
-	//printf("Parsing: Reseting aggregated payloads \n");
+	
+	#if DEBUG_DENSENET
+		printf("Parsing: Reseting aggregated payloads \n");
+	#endif
 }
 
 /**/
-void add_payload(char *content, int int_payload, int n_digits){
-			
-	strcpy(PayloadList.singleP[PayloadList.count_payloads].strContent,content);
-	PayloadList.singleP[PayloadList.count_payloads].intContent=int_payload;
-	PayloadList.singleP[PayloadList.count_payloads].pay_len=n_digits;
-	
+void add_payload(uint8_t *incomingPayload){
+	uint8_t temp[LEN_SINGLE_PAYLOAD];
+	memcpy(temp,incomingPayload,sizeof(uint8_t)*LEN_SINGLE_PAYLOAD);
+
 	#if DEBUG_DENSENET
-	//printf("Parsing: New payload added: int %u string %s num pay %d \n",PayloadList.singleP[PayloadList.count_payloads].intContent,PayloadList.singleP[PayloadList.count_payloads].strContent, PayloadList.count_payloads);
+		printf("incoming=%s temp=%s\n",incomingPayload,temp );
 	#endif
+	
+	PayloadList.singleP[PayloadList.count_payloads].payload=atoi((char*)temp);
 	PayloadList.count_payloads=PayloadList.count_payloads+1;
 }
 
-
-unsigned int get_payloads(int payload_position){
-	return PayloadList.singleP[payload_position].intContent;
+unsigned int get_payloadAt(int payload_position){
+	return PayloadList.singleP[payload_position].payload;
 }
 
-int get_pay_len(int payload_position){
-	return PayloadList.singleP[payload_position].pay_len;
-}
-
-char * get_payload_char(int payload_position){
-	return PayloadList.singleP[payload_position].strContent;
-}
 
 int get_num_payloads(){
-	#if DEBUG_DENSENET
-	//printf("Parsing: Number of agg message %d \n",PayloadList.count_payloads);
-	#endif
 	return PayloadList.count_payloads;
 }

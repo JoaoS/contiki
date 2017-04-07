@@ -51,9 +51,6 @@
 /*subtil*/
 #include "sys/clock.h"
 
-
-#define MAX_N_PAYLOADS 40
-#define LEN_SINGLE_PAYLOAD 4 
 #define MAX_INT 9999
 #define RES_DEBUG 1
 
@@ -61,13 +58,11 @@
 
 static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 static void res_periodic_handler(void);
-static int trans_count=100;
-int payloadConcat(char * test, int totalsize);
-int maxPayload(char * test);
-int minPayload(char * test);
-int avgPayload(char * test);
-//static int reverse(int number);
-
+static int trans_count=1000;
+void payloadConcat(char * test);
+void maxPayload(char * test, unsigned int current);
+void minPayload(char * test,unsigned int current);
+void avgPayload(char * test,unsigned int current);
 
 /*
  * A handler function named [resource name]_handler must be implemented for each RESOURCE.
@@ -81,7 +76,7 @@ PERIODIC_RESOURCE(res_densenet,
          NULL,
          NULL,
          NULL,
-         30*CLOCK_SECOND,
+         15*CLOCK_SECOND,
          res_periodic_handler);
 /*20 seconds =255*/
 static void
@@ -90,62 +85,39 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	/*
 	*	This is where we set the packet payload and annex other payloads if available
 	*	first we should check if packets are available for processing, 
-	*/
-	/*
-	unsigned long cpu = energest_total_time[ENERGEST_TYPE_CPU].current/NEW_RTIMER_SECOND;
-	printf("Current CPU consumption(seconds(%lu): cpu on time=%lu current time=%lu\n\n",clock_seconds(),cpu,energest_total_time[ENERGEST_TYPE_CPU].current);
-	cpu = energest_total_time[ENERGEST_TYPE_CPU].current/RTIMER_SECOND;
-	printf("Current CPU consumption(seconds(%lu): new cpu on time=%lu current time=%lu\n\n",clock_seconds(),cpu,energest_total_time[ENERGEST_TYPE_CPU].current);
-	*/
-	
-	/*
-	unsigned long gled = energest_total_time[ENERGEST_TYPE_LED_GREEN].current;
-	unsigned long rx = energest_total_time[ENERGEST_TYPE_LISTEN].current;
-	unsigned long tx = energest_total_time[ENERGEST_TYPE_TRANSMIT].current;
-	*/
-		
-	/*energia= volt*amp
-	total é energia*volt*tempo
-	tempo=rtimer total/1 second rtimer	
+	*
 	*/
 	char test[MAX_N_PAYLOADS];
-	int totalsize=0,i=0;
+	int i=0;
 	for(i=0;i<MAX_N_PAYLOADS;i=i+1){test[i]='\0';}
 
-	#if PLATFORM_HAS_AGGREGATION
-
-	totalsize = payloadConcat(test, totalsize);
-	#endif
-	/*
-	totalsize = avgPayload(test);
-	totalsize = maxPayload(test);
-	totalsize = minPayload(test);
-	*/
-	
 	/*Each message has node id + tansmission count**/
-	test[totalsize]=NODE_ID+'0';
-	totalsize++;
-	sprintf(test+totalsize,"%d",trans_count);
-	//add size of current counter to totalsize
+	test[0]=NODE_ID+'0';
+	sprintf(test+1,"%d",trans_count);
 
-	/**FIXME the log 10 does not work, count digits*/
-	totalsize+=log10(trans_count);	
-	totalsize++;
-	//printf("count=%d, log=%lf, size=%d\n",trans_count,log10(trans_count), totalsize );
-	/*printf("BEFORE TRANSMISSION COUNT=%d\nBUFFER=%s\n",trans_count,buffer);*/
-	/*clean buffer between msg results n reboots, yay!*/
-	//memset(&buffer,0,sizeof(buffer));
-	memcpy(buffer,test,totalsize*sizeof(char));
 
-	/*reset has to be after operations to not alter values between for loops*/
-	reset_payloads();
+
+	#if PLATFORM_HAS_AGGREGATION
+		if (get_num_payloads()>=1){
+			//payloadConcat(test);
+			avgPayload(test,(unsigned int) atoi(test));
+			printf("number of packets=%d\n",get_num_payloads());
+		}
+	#endif
+
+	memcpy(buffer,test,strlen(test)*sizeof(char));
+
   	REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
-  	REST.set_response_payload(response, buffer, totalsize);
+  	REST.set_response_payload(response, buffer, strlen(test));
+  	/*reset has to be after operations to not alter values between for loops*/
+  	reset_payloads();
 
   	/*This buffer print has data from other transmissions*/
   	#if RES_DEBUG
-  	printf("TRANSMISSION COUNT=%d  BUFFER=%s(%d)\n",trans_count,buffer,totalsize);
+  	//printf("TRANSMISSION COUNT=%d  BUFFER=%s(len-%d)\n",trans_count,buffer,strlen(test));
+  	printf("BUFFER=%s(len-%d)\n",buffer,strlen(test));
 	#endif
+
   	trans_count++;
 }
 
@@ -153,144 +125,73 @@ static void
 res_periodic_handler(){
   /* Do a periodic task here, e.g., sampling a sensor. */
   //++event_counter;
-
   /* Usually a condition is defined under with subscribers are notified, e.g., large enough delta in sensor reading. */
   if(1) {
     /* Notify the registered observers which will trigger the res_get_handler to create the response. */
     REST.notify_subscribers(&res_densenet);
   }
 }
+void 
+payloadConcat(char * test){
 
-
-int 
-payloadConcat(char * test, int totalsize){
-
-	int i=0;
-
-	#if RES_DEBUG
-	printf("--- Number of payloads is %d ---\n",get_num_payloads());
-	#endif
-		/**/
+	int i, total=0;
 	for(i=0;i<get_num_payloads();i=i+1){
-
-		if(i!=0)
-			strncpy((char *)test+totalsize,(char *)get_payload_char(i),LEN_SINGLE_PAYLOAD);
-		else
-			strncpy((char *)test,(char *)get_payload_char(i),LEN_SINGLE_PAYLOAD);
-		/*printf("paychar=%s\n",get_payload_char(i) ); */
-		totalsize+=LEN_SINGLE_PAYLOAD;
+    	total+=snprintf(test+total+LEN_SINGLE_PAYLOAD,(LEN_SINGLE_PAYLOAD*MAX_N_PAYLOADS)-total,"%u",get_payloadAt(i));
+    	//printf("total=%d\n",total );
 	}
-	#if RES_DEBUG
-	//printf("MERGER: test=%s, size=%d\n",test,totalsize );
-	#endif
-
-	return totalsize;
-
 
 }
 
-int 
-avgPayload(char * test){
+void 
+maxPayload(char * test, unsigned int current){
 
 	int i=0;
-	unsigned int totalValues=0;
-	int size=0;
-
-	for(i=0;i<get_num_payloads();i=i+1){
-
-		totalValues+=get_payloads(i);
-		//printf("payloads=%d\n",get_payloads(i) );
-		size=get_pay_len(i);
-
-	}
-	totalValues=totalValues/get_num_payloads();
-	sprintf(test,"%d",totalValues);
-	//printf("AVG char=%d, size avg=%d, test=%s\n",(char*)totalValues,sizeof(totalValues),test);
-
-	/*return number of digits*/
-	return size;
-}
-
-int 
-maxPayload(char * test){
-
-	int i=0;
+	unsigned int max=current;/*my number is the max value*/
 	unsigned int temp=0;
-	int size=0;
-
 
 	for(i=0;i<get_num_payloads();i=i+1){
-
-		if(temp < get_payloads(i))
-			temp = get_payloads(i);
-
-		size=get_pay_len(i);
+		
+		temp=get_payloadAt(i);
+		
+		if(max < temp )
+			max = temp;
 
 	}
-	sprintf(test,"%d",temp);
+	sprintf(test,"%u",max);
 
-	/*return number of digits*/
-	return size;
 }
+void 
+minPayload(char * test,unsigned int current){
+	
+	int i=0;
+	unsigned int min=current;
+	unsigned int temp=0;
 
-int 
-minPayload(char * test){
+	for(i=0;i<get_num_payloads();i=i+1){
+		
+		temp=get_payloadAt(i);
+
+		if(min > temp )
+			min = temp;
+
+
+	}
+	sprintf(test,"%u",min);
+}
+void 
+avgPayload(char * test,unsigned int current){
 
 	int i=0;
-	unsigned int temp=MAX_INT;
-	int size=0;
-
+	unsigned int number=current;
+	printf("num1=%d\n",current );
 
 	for(i=0;i<get_num_payloads();i=i+1){
-
-		if(temp > get_payloads(i))
-			temp = get_payloads(i);
-
-		size=get_pay_len(i);
-
-
+		
+		number += get_payloadAt(i);
 	}
-	sprintf(test,"%d",temp);
+	printf("number=%u\n",number );
+	number=number/(i+1);
+	sprintf(test,"%u",number);
 
-	/*return number of digits*/
-	return size;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*---------------------------------------------------------------------------*/

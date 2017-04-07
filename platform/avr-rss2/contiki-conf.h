@@ -49,10 +49,9 @@
 #define NODE_ID 1 /*if node =1 the output is sent to uart0 in contiki-main*/
 #define DENSENET 1	/*necessary to add observer*/
 #define DEBUG_DENSENET 0
-#define PLATFORM_HAS_AGGREGATION 0
-#define LEN_SINGLE_PAYLOAD 4
-#define MAX_N_PAYLOADS 40
-
+#define PLATFORM_HAS_AGGREGATION 1
+#define LEN_SINGLE_PAYLOAD 5 /*len of node id + transmission cont*/
+#define MAX_N_PAYLOADS 20	/*max number of payloads allowed in aggregation buffer*/
 #define WARMUP_DISCARD 180 /*discard first x seconds from energest*/
 #define ENERGEST_UPDATE 4 /*time interval that takes the platform to update the energest values, rtimer_second 7812 (timeout at 8 seconds)*/
 
