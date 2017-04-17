@@ -46,7 +46,7 @@ void reset_payloads(){
 /**/
 void add_payload(uint8_t *incomingPayload){
 	uint8_t temp[LEN_SINGLE_PAYLOAD];
-	memcpy(temp,incomingPayload,sizeof(uint8_t)*LEN_SINGLE_PAYLOAD);
+	memcpy(temp,incomingPayload,LEN_SINGLE_PAYLOAD);
 
 	#if DEBUG_DENSENET
 		printf("incoming=%s temp=%s\n",incomingPayload,temp );

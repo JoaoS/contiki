@@ -92,16 +92,16 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	for(i=0;i<MAX_N_PAYLOADS;i=i+1){test[i]='\0';}
 
 	/*Each message has node id + tansmission count**/
-	test[0]=NODE_ID+'0';
-	sprintf(test+1,"%d",trans_count);
+	//	test[0]=NODE_ID+'0';
+	//	sprintf(test+1,"%d",trans_count);
 
 
 
 	#if PLATFORM_HAS_AGGREGATION
 		if (get_num_payloads()>=1){
-			//payloadConcat(test);
-			avgPayload(test,(unsigned int) atoi(test));
-			printf("number of packets=%d\n",get_num_payloads());
+			payloadConcat(test);
+			//avgPayload(test,(unsigned int) atoi(test));
+			//printf("number of packets=%d\n",get_num_payloads());
 		}
 	#endif
 
@@ -115,7 +115,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
   	/*This buffer print has data from other transmissions*/
   	#if RES_DEBUG
   	//printf("TRANSMISSION COUNT=%d  BUFFER=%s(len-%d)\n",trans_count,buffer,strlen(test));
-  	printf("BUFFER=%s(len-%d)\n",buffer,strlen(test));
+  	printf("BUFFER=%s(%d) total trans=%d\n",buffer,strlen(test),trans_count);
 	#endif
 
   	trans_count++;
@@ -136,7 +136,7 @@ payloadConcat(char * test){
 
 	int i, total=0;
 	for(i=0;i<get_num_payloads();i=i+1){
-    	total+=snprintf(test+total+LEN_SINGLE_PAYLOAD,(LEN_SINGLE_PAYLOAD*MAX_N_PAYLOADS)-total,"%u",get_payloadAt(i));
+    	total+=snprintf(test+total,(LEN_SINGLE_PAYLOAD*MAX_N_PAYLOADS)-total,"%u",get_payloadAt(i));
     	//printf("total=%d\n",total );
 	}
 

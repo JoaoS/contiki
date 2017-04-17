@@ -59,8 +59,11 @@
 #include "apps/rest-engine/rest-engine.h"
 #include <stdlib.h>
 #endif
-//static void print_ipv6_addr(const uip_ipaddr_t *ip_addr);
-int totalnode2=0, totalnode3=0; 
+unsigned long totalRecCoap=0;
+unsigned long totalRecCoapSize=0;
+/*printing this function will fill fill the receive/send buffers with junk! but why?*/
+static void print_ipv6_addr(const uip_ipaddr_t *ip_addr);
+
 
 #include <string.h>
 
@@ -218,11 +221,20 @@ packet_input(void)
     /*densenet*/
     // length between the limits and not my address
     if((uip_len>55 && uip_len<=100) && !uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr) ){
+      //printf("uip_len=%d && source=",uip_len);
+      print_ipv6_addr(&UIP_IP_BUF->srcipaddr);
+      totalRecCoap++;
+      totalRecCoapSize+=uip_len;
+
+
+      
       #if PLATFORM_HAS_AGGREGATION
-      doAggregation();
+        doAggregation();
       #endif
     }
     uip_input();
+
+
      
 
     if(uip_len > 0) {
@@ -880,9 +892,11 @@ void doAggregation(void){
     //printf("Parsing: coap_code  is %d, version is %d \n", coap_pt->code,coap_pt->version);
       
     if(coap_pt->code==69 && coap_pt->version ==1){
+      
+      totalRecCoap++;
+      totalRecCoapSize+=uip_len;
 
       add_payload(coap_pt->payload);
-
 
       /* Drop all not self-produced packets.*/
       uip_len = 0;
@@ -893,7 +907,7 @@ void doAggregation(void){
 
 }
 #endif
-/*
+
 static void
 print_ipv6_addr(const uip_ipaddr_t *ip_addr) {
     int i;
@@ -902,6 +916,6 @@ print_ipv6_addr(const uip_ipaddr_t *ip_addr) {
     }
     printf("\n");
 }
-*/
+
 
 /*---------------------------------------------------------------------------*/

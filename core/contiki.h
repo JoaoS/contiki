@@ -33,6 +33,14 @@
  */
 #ifndef CONTIKI_H_
 #define CONTIKI_H_
+extern unsigned long totalTrans;
+extern unsigned long totalRec;
+
+extern unsigned long totalTransSize;
+extern unsigned long totalRecSize;
+
+extern unsigned long totalRecCoap;
+extern unsigned long totalRecCoapSize;
 
 #include "contiki-version.h"
 #include "contiki-conf.h"

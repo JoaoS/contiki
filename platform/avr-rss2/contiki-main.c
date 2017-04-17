@@ -67,7 +67,6 @@
 #include "net/ipv6/sicslowpan.h"
 
 #include "contiki.h"
-unsigned long global_total_trans=0;
 unsigned long totalpower, cpu, tx, rx;
 
 #include "contiki-net.h"
@@ -565,8 +564,13 @@ main(void)
           if((clocktime % WARMUP_DISCARD)==0){
             /*printf("Reset Energest\n");*/
             energest_init();
-            global_total_trans=0;
             stopFlag=0;
+            totalRecCoap=0;
+            totalTrans=0;
+            totalTransSize=0;
+            totalRec=0;
+            totalRecSize=0;
+            totalRecCoapSize=0;
           }
         }
         else{
@@ -581,13 +585,14 @@ main(void)
           tx =  (unsigned long)(energest_total_time[ENERGEST_TYPE_TRANSMIT].current*21.44*3.3)/RTIMER_ARCH_SECOND;
           totalpower=cpu+rx+tx;
           printf("cpu=%lu, rx=%lu, tx=%lu totalpower=%lu\n",(unsigned long)(energest_total_time[ENERGEST_TYPE_CPU].current*9*3.3)/RTIMER_ARCH_SECOND, (unsigned long)(energest_total_time[ENERGEST_TYPE_LISTEN].current*17.87*3.3)/RTIMER_ARCH_SECOND, (unsigned long)(energest_total_time[ENERGEST_TYPE_TRANSMIT].current*21.6*3.3)/RTIMER_ARCH_SECOND,totalpower );
-
         }      
         
 #endif
 #if ENERGEST_CONF_ON
 #include "lib/print-stats.h"
         print_stats();
+        printf("totalTrans=%lu, totalTranSsize=%lu,totalRec=%lu, totalRecSsize=%lu\n",totalTrans,totalTransSize,totalRec,totalRecSize );
+        printf("totalrecCoap=%lu, totalrecCoapSize=%lu\n",totalRecCoap,totalRecCoapSize );
 
 #elif RADIOSTATS
         extern volatile unsigned long radioontime;

@@ -43,6 +43,10 @@
 #include <string.h>
 
 #include "contiki.h"
+unsigned long totalTrans=0;
+unsigned long totalRec=0;
+unsigned long totalTransSize=0;
+unsigned long totalRecSize=0;
 
 #if defined(__AVR__)
 #include <avr/io.h>
@@ -176,6 +180,7 @@ struct timestamp {
  * we just add two zero bytes to the packet dump. Don't forget to enable wireshark
  * 802.15.4 dissection even when the checksum is wrong!
  */
+
 #endif
 
 /* See clock.c and httpd-cgi.c for RADIOSTATS code */
@@ -1032,6 +1037,8 @@ rf230_transmit(unsigned short payload_len)
 
   HAL_LEAVE_CRITICAL_REGION();
   PRINTF("rf230_transmit: %d\n", (int)total_len);
+  totalTrans++;
+  totalTransSize+=(unsigned long)total_len;
 
 #if DEBUG>1
 /* Note the dumped packet will have a zero checksum unless compiled with RF230_CONF_CHECKSUM
@@ -1401,6 +1408,8 @@ PROCESS_THREAD(rf230_process, ev, data)
     /* Restore interrupts. */
     HAL_LEAVE_CRITICAL_REGION();
     PRINTF("rf230_read: %u bytes lqi %u\n",len,rf230_last_correlation);
+    totalRec++;
+    totalRecSize+=(unsigned long)len;
 
     if(is_promiscuous) {
       uint8_t i;
@@ -1795,6 +1804,7 @@ rf230_receiving_packet(void)
     radio_state = hal_subregister_read(SR_TRX_STATUS);
     if ((radio_state==BUSY_RX) || (radio_state==BUSY_RX_AACK)) {
 //      DEBUGFLOW('8');
+
       return 1;
     }
   }
