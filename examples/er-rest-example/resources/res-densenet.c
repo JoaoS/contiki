@@ -92,8 +92,18 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	for(i=0;i<MAX_N_PAYLOADS;i=i+1){test[i]='\0';}
 
 	/*Each message has node id + tansmission count**/
-	//	test[0]=NODE_ID+'0';
-	//	sprintf(test+1,"%d",trans_count);
+	test[0]=NODE_ID+'0';
+	sprintf(test+1,"%d",trans_count);
+	
+	test[5]=NODE_ID+'0';
+	sprintf(test+6,"%d",trans_count);
+	test[10]=NODE_ID+'0';
+	sprintf(test+11,"%d",trans_count);
+	test[15]=NODE_ID+'0';
+	sprintf(test+16,"%d",trans_count);	
+
+	test[20]=NODE_ID+'0';
+	sprintf(test+21,"%d",trans_count);	
 
 
 
@@ -137,8 +147,13 @@ payloadConcat(char * test){
 	int i, total=0;
 	for(i=0;i<get_num_payloads();i=i+1){
     	total+=snprintf(test+total,(LEN_SINGLE_PAYLOAD*MAX_N_PAYLOADS)-total,"%u",get_payloadAt(i));
-    	//printf("total=%d\n",total );
+    	total+=snprintf(test+total,(LEN_SINGLE_PAYLOAD*MAX_N_PAYLOADS)-total,"%u",get_payloadAt(i));
+    	total+=snprintf(test+total,(LEN_SINGLE_PAYLOAD*MAX_N_PAYLOADS)-total,"%u",get_payloadAt(i));
+    	total+=snprintf(test+total,(LEN_SINGLE_PAYLOAD*MAX_N_PAYLOADS)-total,"%u",get_payloadAt(i));
+
+    	//printf("test=%s\n",test );
 	}
+
 
 }
 

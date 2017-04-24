@@ -226,8 +226,6 @@ packet_input(void)
       totalRecCoap++;
       totalRecCoapSize+=uip_len;
 
-
-      
       #if PLATFORM_HAS_AGGREGATION
         doAggregation();
       #endif
