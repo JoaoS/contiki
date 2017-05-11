@@ -76,7 +76,7 @@ PERIODIC_RESOURCE(res_densenet,
          NULL,
          NULL,
          NULL,
-         15*CLOCK_SECOND,
+         20*CLOCK_SECOND,
          res_periodic_handler);
 /*20 seconds =255*/
 static void
@@ -93,26 +93,44 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 
 	/*Each message has node id + tansmission count**/
 	test[0]=NODE_ID+'0';
-	sprintf(test+1,"%d",trans_count);
+	sprintf(test+1,"%d",0);
 	
+	/*
 	test[5]=NODE_ID+'0';
 	sprintf(test+6,"%d",trans_count);
+	
 	test[10]=NODE_ID+'0';
 	sprintf(test+11,"%d",trans_count);
+	/*
 	test[15]=NODE_ID+'0';
 	sprintf(test+16,"%d",trans_count);	
-
+	2
 	test[20]=NODE_ID+'0';
 	sprintf(test+21,"%d",trans_count);	
-
+	
+	test[25]=NODE_ID+'0';
+	sprintf(test+26,"%d",trans_count);	
+	
+	test[30]=NODE_ID+'0';
+	sprintf(test+31,"%d",trans_count);
+	
+	test[35]=NODE_ID+'0';
+	sprintf(test+36,"%d",trans_count);	
+	
+	test[40]=NODE_ID+'0';
+	sprintf(test+41,"%d",trans_count);	*/	
+	
 
 
 	#if PLATFORM_HAS_AGGREGATION
+		ENERGEST_ON(ENERGEST_TYPE_SENSORS);
 		if (get_num_payloads()>=1){
 			payloadConcat(test);
 			//avgPayload(test,(unsigned int) atoi(test));
 			//printf("number of packets=%d\n",get_num_payloads());
 		}
+		ENERGEST_OFF(ENERGEST_TYPE_SENSORS);
+
 	#endif
 
 	memcpy(buffer,test,strlen(test)*sizeof(char));
@@ -146,9 +164,6 @@ payloadConcat(char * test){
 
 	int i, total=0;
 	for(i=0;i<get_num_payloads();i=i+1){
-    	total+=snprintf(test+total,(LEN_SINGLE_PAYLOAD*MAX_N_PAYLOADS)-total,"%u",get_payloadAt(i));
-    	total+=snprintf(test+total,(LEN_SINGLE_PAYLOAD*MAX_N_PAYLOADS)-total,"%u",get_payloadAt(i));
-    	total+=snprintf(test+total,(LEN_SINGLE_PAYLOAD*MAX_N_PAYLOADS)-total,"%u",get_payloadAt(i));
     	total+=snprintf(test+total,(LEN_SINGLE_PAYLOAD*MAX_N_PAYLOADS)-total,"%u",get_payloadAt(i));
 
     	//printf("test=%s\n",test );

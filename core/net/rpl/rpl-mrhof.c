@@ -253,31 +253,12 @@ best_parent(rpl_parent_t *p1, rpl_parent_t *p2)
   #define PRINT6ADDR2(addr) printf("[%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x]\n", ((uint8_t *)addr)[0], ((uint8_t *)addr)[1], ((uint8_t *)addr)[2], ((uint8_t *)addr)[3], ((uint8_t *)addr)[4], ((uint8_t *)addr)[5], ((uint8_t *)addr)[6], ((uint8_t *)addr)[7], ((uint8_t *)addr)[8], ((uint8_t *)addr)[9], ((uint8_t *)addr)[10], ((uint8_t *)addr)[11], ((uint8_t *)addr)[12], ((uint8_t *)addr)[13], ((uint8_t *)addr)[14], ((uint8_t *)addr)[15])
   int is_the_static_nexthop(rpl_parent_t *p1){
     
-    uip_ipaddr_t static_addr;
-    static uint16_t addr_aux[8];
+    //uip_ipaddr_t static_addr;
+    //static uint16_t addr_aux[8];
     uip_ip6addr_t target;
     uiplib_ip6addrconv("fe80:0000:0000:0000:fec2:3d00:0000:0001",&target);
-     
-     // Define here the static address
-    if(NODE_ID >= 2){
-      addr_aux[0] = 0xfe80;
-      addr_aux[1] = 0x0000;
-      addr_aux[2] = 0x0000;
-      addr_aux[3] = 0x0000;
-      addr_aux[4] = 0xfec2;
-      addr_aux[5] = 0x3d00;
-      addr_aux[6] = 0x0000;
-      addr_aux[7] = 0x0001;
-    }
 
-    uip_ip6addr(&static_addr, addr_aux[0], addr_aux[1], addr_aux[2], addr_aux[3], addr_aux[4],addr_aux[5],addr_aux[6],addr_aux[7]);
-    
-    //printf("\n\n");
-    //PRINT6ADDR2(rpl_get_parent_ipaddr(p1));
-    //printf("comparing node value=%d\n",uip_ipaddr_cmp(rpl_get_parent_ipaddr(p1), &static_addr));
-    //printf("comparing 2 node value=%d\n\n",uip_ipaddr_cmp(rpl_get_parent_ipaddr(p1), &target));
-    
-    
+
     if(uip_ipaddr_cmp(rpl_get_parent_ipaddr(p1), &target)){
       #if DEBUG_DENSENET
       printf("Static Parent: The tested parent has the following address");

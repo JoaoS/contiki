@@ -584,7 +584,7 @@ main(void)
           rx =  (unsigned long)(energest_total_time[ENERGEST_TYPE_LISTEN].current*15.49*3.3)/RTIMER_ARCH_SECOND;
           tx =  (unsigned long)(energest_total_time[ENERGEST_TYPE_TRANSMIT].current*21.44*3.3)/RTIMER_ARCH_SECOND;
           totalpower=cpu+rx+tx;
-          printf("cpu=%lu, rx=%lu, tx=%lu totalpower=%lu\n",(unsigned long)(energest_total_time[ENERGEST_TYPE_CPU].current*9*3.3)/RTIMER_ARCH_SECOND, (unsigned long)(energest_total_time[ENERGEST_TYPE_LISTEN].current*17.87*3.3)/RTIMER_ARCH_SECOND, (unsigned long)(energest_total_time[ENERGEST_TYPE_TRANSMIT].current*21.6*3.3)/RTIMER_ARCH_SECOND,totalpower );
+          printf("totalpower=%lu\n",totalpower );
         }      
         
 #endif

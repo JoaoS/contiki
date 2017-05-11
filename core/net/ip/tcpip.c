@@ -218,19 +218,30 @@ packet_input(void)
 #endif /* UIP_CONF_IP_FORWARD */
 
     check_for_tcp_syn();
+    uip_input();
+
     /*densenet*/
     // length between the limits and not my address
-    if((uip_len>55 && uip_len<=100) && !uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr) ){
+    if((uip_len>55 && uip_len<=110) && !uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr) ){
       //printf("uip_len=%d && source=",uip_len);
-      print_ipv6_addr(&UIP_IP_BUF->srcipaddr);
-      totalRecCoap++;
-      totalRecCoapSize+=uip_len;
-
+    
+      
       #if PLATFORM_HAS_AGGREGATION
+      ENERGEST_ON(ENERGEST_TYPE_SENSORS);
         doAggregation();
+        print_ipv6_addr(&UIP_IP_BUF->srcipaddr);
+
+      ENERGEST_OFF(ENERGEST_TYPE_SENSORS);
+      #else
+      
+        print_ipv6_addr(&UIP_IP_BUF->srcipaddr);
+        totalRecCoap++;
+        totalRecCoapSize+=uip_len;
+
       #endif
+
+
     }
-    uip_input();
 
 
      
@@ -910,7 +921,8 @@ static void
 print_ipv6_addr(const uip_ipaddr_t *ip_addr) {
     int i;
     for (i = 0; i < 16; i++) {
-        printf("%02x", ip_addr->u8[i]);
+      printf("%02x", ip_addr->u8[i]);
+
     }
     printf("\n");
 }
