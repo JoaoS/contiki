@@ -46,7 +46,7 @@
 #endif
 
 /*DENSENET AGGREGATION*/
-#define NODE_ID 3 /*if node =1 the output is sent to uart0 in contiki-main*/
+#define NODE_ID 10 /*if node =1 the output is sent to uart0 in contiki-main*/
 #define DENSENET 1	/*necessary to add observer*/
 #define DEBUG_DENSENET 0
 #define PLATFORM_HAS_AGGREGATION 0
@@ -54,8 +54,10 @@
 #define MAX_N_PAYLOADS 100	/*max number of payloads allowed in aggregation buffer*/
 #define WARMUP_DISCARD 180 /*discard first x seconds from energest*/
 #define ENERGEST_UPDATE 4 /*time interval that takes the platform to update the energest values, rtimer_second 7812 (timeout at 8 seconds)*/
-
-
+#define SEND_INTERVAL 6.6 /*control the time interval to send CoAP Packets, only available in NODE != 1*/
+#define FATHER_NODE "fe80:0000:0000:0000:fec2:3d00:0000:0003"
+#define RF230_MAX_TX_POWER 15
+#define RF230_MIN_RX_POWER 50
 /***END DENSENET***/
 
 /* Platform name, type, and MCU clock rate */
@@ -169,6 +171,7 @@ typedef unsigned short uip_stats_t;
 /* The rf231 and atmega128rfa1 can use an rssi threshold for triggering rx_busy that saves 0.5ma in rx mode */
 /* 1 - 15 maps into -90 to -48 dBm; the register is written with RF230_MIN_RX_POWER/6 + 1. Undefine for -100dBm sensitivity */
 /* #define RF230_MIN_RX_POWER        0 */
+
 
 /* Network setup */
 /* TX routine passes the cca/ack result in the return parameter */

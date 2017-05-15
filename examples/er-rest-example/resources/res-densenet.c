@@ -52,7 +52,7 @@
 #include "sys/clock.h"
 
 #define MAX_INT 9999
-#define RES_DEBUG 1
+#define RES_DEBUG 0
 
 
 
@@ -76,7 +76,7 @@ PERIODIC_RESOURCE(res_densenet,
          NULL,
          NULL,
          NULL,
-         20*CLOCK_SECOND,
+         SEND_INTERVAL*CLOCK_SECOND,
          res_periodic_handler);
 /*20 seconds =255*/
 static void
@@ -92,33 +92,10 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 	for(i=0;i<MAX_N_PAYLOADS;i=i+1){test[i]='\0';}
 
 	/*Each message has node id + tansmission count**/
+	#if NODE_ID > 3 
 	test[0]=NODE_ID+'0';
 	sprintf(test+1,"%d",0);
-	
-	/*
-	test[5]=NODE_ID+'0';
-	sprintf(test+6,"%d",trans_count);
-	
-	test[10]=NODE_ID+'0';
-	sprintf(test+11,"%d",trans_count);
-	/*
-	test[15]=NODE_ID+'0';
-	sprintf(test+16,"%d",trans_count);	
-	2
-	test[20]=NODE_ID+'0';
-	sprintf(test+21,"%d",trans_count);	
-	
-	test[25]=NODE_ID+'0';
-	sprintf(test+26,"%d",trans_count);	
-	
-	test[30]=NODE_ID+'0';
-	sprintf(test+31,"%d",trans_count);
-	
-	test[35]=NODE_ID+'0';
-	sprintf(test+36,"%d",trans_count);	
-	
-	test[40]=NODE_ID+'0';
-	sprintf(test+41,"%d",trans_count);	*/	
+	#endif
 	
 
 

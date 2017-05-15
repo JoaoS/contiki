@@ -50,6 +50,7 @@
 #include "net/rpl/rpl-private.h"
 #include "net/nbr-table.h"
 #include "net/link-stats.h"
+#include "net/ip/uiplib.h"
 
 /*subtil
 #if PLATFORM_HAS_AGGREGATION
@@ -256,7 +257,7 @@ best_parent(rpl_parent_t *p1, rpl_parent_t *p2)
     //uip_ipaddr_t static_addr;
     //static uint16_t addr_aux[8];
     uip_ip6addr_t target;
-    uiplib_ip6addrconv("fe80:0000:0000:0000:fec2:3d00:0000:0001",&target);
+    uiplib_ip6addrconv(FATHER_NODE,&target);
 
 
     if(uip_ipaddr_cmp(rpl_get_parent_ipaddr(p1), &target)){
