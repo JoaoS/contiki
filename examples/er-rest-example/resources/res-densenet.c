@@ -52,7 +52,7 @@
 #include "sys/clock.h"
 
 #define MAX_INT 9999
-#define RES_DEBUG 0
+#define RES_DEBUG 1
 
 
 
@@ -82,23 +82,15 @@ PERIODIC_RESOURCE(res_densenet,
 static void
 res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
-	/*
-	*	This is where we set the packet payload and annex other payloads if available
-	*	first we should check if packets are available for processing, 
-	*
-	*/
-	char test[MAX_N_PAYLOADS];
-	int i=0;
-	for(i=0;i<MAX_N_PAYLOADS;i=i+1){test[i]='\0';}
-
-	/*Each message has node id + tansmission count**/
-	#if NODE_ID > 3 
-	test[0]=NODE_ID+'0';
-	sprintf(test+1,"%d",0);
-	#endif
 	
+	/*create my own header*/
+	uint8_t fixed_header=0;
+	fixed_header |= EXTERNAL_CONCAT << FIX_AGG_HEADER_ALLOW_CONCAT_POSITION;
+	fixed_header |= 2 << FIX_AGG_HEADER_NRPAYLOADS_POSITION;
 
 
+
+	/*
 	#if PLATFORM_HAS_AGGREGATION
 		ENERGEST_ON(ENERGEST_TYPE_SENSORS);
 		if (get_num_payloads()>=1){
@@ -109,18 +101,21 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 		ENERGEST_OFF(ENERGEST_TYPE_SENSORS);
 
 	#endif
+	*/
 
-	memcpy(buffer,test,strlen(test)*sizeof(char));
+	memcpy(buffer,&fixed_header,sizeof(uint8_t));
+
+
 
   	REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
-  	REST.set_response_payload(response, buffer, strlen(test));
+  	REST.set_response_payload(response, buffer, 1);
   	/*reset has to be after operations to not alter values between for loops*/
   	reset_payloads();
 
   	/*This buffer print has data from other transmissions*/
   	#if RES_DEBUG
   	//printf("TRANSMISSION COUNT=%d  BUFFER=%s(len-%d)\n",trans_count,buffer,strlen(test));
-  	printf("BUFFER=%s(%d) total trans=%d\n",buffer,strlen(test),trans_count);
+  	printf("BUFFER=%u(%u) total trans=%d\n",buffer,fixed_header,trans_count);
 	#endif
 
   	trans_count++;

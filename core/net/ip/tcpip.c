@@ -225,7 +225,7 @@ packet_input(void)
     if((uip_len>55 && uip_len<=110) && !uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr) ){
       //printf("uip_len=%d && source=",uip_len);
     
-      
+      printf("size=%d\n",uip_len );
       #if PLATFORM_HAS_AGGREGATION
       ENERGEST_ON(ENERGEST_TYPE_SENSORS);
         doAggregation();
@@ -899,19 +899,24 @@ void doAggregation(void){
     unsigned int begin_payload_index=UIP_IPUDPH_LEN+8;  // For some reason the forwarded packet has 8 more bytes
     coap_parse_message(coap_pt, &uip_buf[begin_payload_index], uip_datalen());
     //printf("Parsing: coap_code  is %d, version is %d \n", coap_pt->code,coap_pt->version);
-      
     if(coap_pt->code==69 && coap_pt->version ==1){
       
       totalRecCoap++;
-      totalRecCoapSize+=uip_len;
+      totalRecCoapSize+=uip_len-8; /*the uip buffer has 8 more bytes, so discard them*/
+      
+      /*printf("len no tcp, uip_len=%d\n",uip_len);*/
 
-      add_payload(coap_pt->payload);
+      /*check if i can add my payload as external or as internal*/
+      parse_fix_agg_header(coap_pt->payload);
+
 
       /* Drop all not self-produced packets.*/
+      /* 
       uip_len = 0;
       uip_ext_len = 0;
       uip_flags = 0;
       return;
+      */
     } 
 
 }

@@ -143,7 +143,7 @@ PROCESS_THREAD(er_example_server, ev, data)
 /*  rest_activate_resource(&res_mirror, "debug/mirror"); */
 /*  rest_activate_resource(&res_chunks, "test/chunks"); */
 /*  rest_activate_resource(&res_separate, "test/separate"); */
-  #if NODE_ID > 3 || PLATFORM_HAS_AGGREGATION 
+  #if NODE_ID >= 2  
   rest_activate_resource(&res_densenet, "test/densenet");
   #endif 
 /*  rest_activate_resource(&res_event, "sensors/button"); */

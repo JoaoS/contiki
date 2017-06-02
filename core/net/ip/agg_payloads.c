@@ -64,3 +64,22 @@ unsigned int get_payloadAt(int payload_position){
 int get_num_payloads(){
 	return PayloadList.count_payloads;
 }
+
+/*functions to perform biwtise operations*/
+
+
+void parse_fix_agg_header(uint8_t * payload){
+/*
+*1 bit to check if external concat is enabled
+*3 reserved bits, no need to check those 
+*4 bits to the number os payloads
+*/
+uint8_t ext_concat = (FIX_AGG_HEADER_ALLOW_CONCAT_MASK & *payload) >> FIX_AGG_HEADER_ALLOW_CONCAT_POSITION;
+uint8_t	nr_payloads = (FIX_AGG_HEADER_NRPAYLOADS_MASK & * payload) >>FIX_AGG_HEADER_NRPAYLOADS_POSITION;
+
+printf("i have =%d incoming payloads\n",nr_payloads );
+
+//call function that checks for groupid in any of the payloads
+
+
+}
