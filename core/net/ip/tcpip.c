@@ -225,7 +225,6 @@ packet_input(void)
     if((uip_len>55 && uip_len<=110) && !uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr) ){
       //printf("uip_len=%d && source=",uip_len);
     
-      printf("size=%d\n",uip_len );
       #if PLATFORM_HAS_AGGREGATION
       ENERGEST_ON(ENERGEST_TYPE_SENSORS);
         doAggregation();
@@ -236,7 +235,7 @@ packet_input(void)
       
         print_ipv6_addr(&UIP_IP_BUF->srcipaddr);
         totalRecCoap++;
-        totalRecCoapSize+=uip_len;
+        totalRecCoapSize+=uip_len-8; /*the uip buffer has 8 more bytes, so discard them*/
 
       #endif
 
@@ -904,21 +903,17 @@ void doAggregation(void){
       totalRecCoap++;
       totalRecCoapSize+=uip_len-8; /*the uip buffer has 8 more bytes, so discard them*/
       
-      /*printf("len no tcp, uip_len=%d\n",uip_len);*/
 
       /*check if i can add my payload as external or as internal*/
-      parse_fix_agg_header(coap_pt->payload);
-
-
-      /* Drop all not self-produced packets.*/
-      /* 
-      uip_len = 0;
-      uip_ext_len = 0;
-      uip_flags = 0;
-      return;
-      */
+      /*returns 1 if a packet is saved, if zero is return forward the packet*/
+      if(parse_fix_agg_header(coap_pt->payload)){
+        /* Drop all not self-produced packets.*/
+        uip_len = 0;
+        uip_ext_len = 0;
+        uip_flags = 0;
+        return;
+      }     
     } 
-
 }
 #endif
 

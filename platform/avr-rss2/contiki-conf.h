@@ -46,19 +46,21 @@
 #endif
 
 /*DENSENET AGGREGATION*/
-#define NODE_ID 2 /*if node =1 the output is sent to uart0 in contiki-main*/
+#define NODE_ID 1 /*if node =1 the output is sent to uart0 in contiki-main*/
+#define PRODUCER 0 // a producer creates data to agregate
 #define DENSENET 1	/*necessary to add observer*/
 #define DEBUG_DENSENET 0
-#define PLATFORM_HAS_AGGREGATION 0
-#define LEN_SINGLE_PAYLOAD 2 /*len of node id + transmission cont*/
-#define MAX_N_PAYLOADS 100	/*max number of payloads allowed in aggregation buffer*/
-#define WARMUP_DISCARD 180 /*discard first x seconds from energest*/
+#define PLATFORM_HAS_AGGREGATION 1
+#define MAX_N_PAYLOADS 5	/*this value should equal to the number of max existing groups*/
+#define WARMUP_DISCARD 240 /*discard first x seconds from energest*/
 #define ENERGEST_UPDATE 4 /*time interval that takes the platform to update the energest values, rtimer_second 7812 (timeout at 8 seconds)*/
-#define SEND_INTERVAL 15 /*control the time interval to send CoAP Packets, only available in NODE != 1*/
+#define SEND_INTERVAL 120 /*control the time interval to send CoAP Packets, only available in NODE != 1*/
 #define FATHER_NODE "fe80:0000:0000:0000:fec2:3d00:0000:0001"
 /***END DENSENET***/
 /*Header variables*/
 #define EXTERNAL_CONCAT			1
+#define GROUPID 				0
+#define AGG_FUNCTION	AGG_AVG_FUNC
 
 
 
@@ -70,6 +72,17 @@
 #define FIX_AGG_HEADER_RESERVED_POSITION		4
 #define FIX_AGG_HEADER_NRPAYLOADS_MASK			0x0F
 #define FIX_AGG_HEADER_NRPAYLOADS_POSITION		0
+
+#define GROUPID_MASK							0XF0
+#define GROUPID_POSITION						4
+#define AGG_FUNCTION_MASK						0X0F
+#define AGG_FUNCTION_POSITION					0
+#define NRVALUES_MASK							0XF0
+#define NRVALUES_POSITION						4
+#define UNIT_RESERVED_MASK						0X0F
+#define UNIT_RESERVED_POSITION					0
+
+#define PAYLOAD_MASK							0xFF	
 
 /**/
 /* Platform name, type, and MCU clock rate */

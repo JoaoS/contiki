@@ -51,18 +51,17 @@
 /*subtil*/
 #include "sys/clock.h"
 
-#define MAX_INT 9999
 #define RES_DEBUG 1
+#define N_VALUES 3 //number of uint8_t elements of packets, 1 fixed +2 information and 2(uint16_t) for the payload
 
 
 
 static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 static void res_periodic_handler(void);
-static int trans_count=1000;
+static int trans_count=GROUPID*1000+NODE_ID;
+
+
 void payloadConcat(char * test);
-void maxPayload(char * test, unsigned int current);
-void minPayload(char * test,unsigned int current);
-void avgPayload(char * test,unsigned int current);
 
 /*
  * A handler function named [resource name]_handler must be implemented for each RESOURCE.
@@ -81,44 +80,109 @@ PERIODIC_RESOURCE(res_densenet,
 /*20 seconds =255*/
 static void
 res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
-{
+{	
+	/*check if i have data to send*/
 	
-	/*create my own header*/
-	uint8_t fixed_header=0;
-	fixed_header |= EXTERNAL_CONCAT << FIX_AGG_HEADER_ALLOW_CONCAT_POSITION;
-	fixed_header |= 2 << FIX_AGG_HEADER_NRPAYLOADS_POSITION;
+	#if PRODUCER
+		uint8_t  my_packet[N_VALUES]={0};
+		uint8_t fixed_header,var;
+		uint16_t payload=0;
+		
+		fixed_header=var=0;
+
+		/*create my own header*/
+		fixed_header |= EXTERNAL_CONCAT << FIX_AGG_HEADER_ALLOW_CONCAT_POSITION;
+		fixed_header |= 1 << FIX_AGG_HEADER_NRPAYLOADS_POSITION;				//producer only produces one packet
+		my_packet[0] = fixed_header;
 
 
+		/*now create the unit payload*/
+		/*fullfil first byte of my packet, groupid and aggregation function*/
+		var |= GROUPID << GROUPID_POSITION;
+		var |= AGG_FUNCTION << AGG_FUNCTION_POSITION;
+		my_packet[1] = var;
 
-	/*
-	#if PLATFORM_HAS_AGGREGATION
-		ENERGEST_ON(ENERGEST_TYPE_SENSORS);
-		if (get_num_payloads()>=1){
-			payloadConcat(test);
-			//avgPayload(test,(unsigned int) atoi(test));
-			//printf("number of packets=%d\n",get_num_payloads());
-		}
-		ENERGEST_OFF(ENERGEST_TYPE_SENSORS);
+		var=0;
+		var |= 1 << NRVALUES_POSITION;
+		var |= 0 << UNIT_RESERVED_POSITION;
+		my_packet[2] = var;
+
+		payload=trans_count;//the actual payload value
+
+		/*copy all data to buffer*/
+		memcpy(buffer,&my_packet,N_VALUES*sizeof(uint8_t));
+		memcpy(buffer+N_VALUES*sizeof(uint8_t),&payload,sizeof(uint16_t));
+		REST.set_response_payload(response, buffer, 5);
+
+	#else
+
+		#if PLATFORM_HAS_AGGREGATION
+			ENERGEST_ON(ENERGEST_TYPE_SENSORS);
+			/*go through buffer and add all the data*/
+			int nr_units=payload_number();
+			int flag=0;
+			uint8_t fixed_header=0;
+			uint8_t byte_one, byte_two;
+			uint16_t payload=0;
+
+			
+			fixed_header |= EXTERNAL_CONCAT << FIX_AGG_HEADER_ALLOW_CONCAT_POSITION;
+			fixed_header |= nr_units << FIX_AGG_HEADER_NRPAYLOADS_POSITION;				//producer only produces one packet
+			memcpy(buffer,&fixed_header,sizeof(uint8_t));//put the fixed header in buffer
+
+			int i=0;
+			if (nr_units)//if i have packets to send
+			{
+				for (; i < MAX_N_PAYLOADS; ++i)
+				{
+
+					singlePayload * iterator=ask_list(i);
+					if (iterator->flag)
+					{
+						//create unit
+						printf(" iteration number=%d\n",i);
+						byte_one=byte_two=0;
+
+						byte_one |= (iterator->groupID) << GROUPID_POSITION;
+						byte_one |= (iterator->agg_function) << AGG_FUNCTION_POSITION;
+						
+						byte_two |= (iterator->total_num) << NRVALUES_POSITION;
+
+						payload=(iterator->value);
+
+						memcpy(buffer+(1*sizeof(uint8_t))+(4*flag*sizeof(uint8_t)),&byte_one,sizeof(uint8_t)); //byte one
+						memcpy(buffer+(1*sizeof(uint8_t))+(1*sizeof(uint8_t))+(4*flag*sizeof(uint8_t)),&byte_two,sizeof(uint8_t));//byte two
+						memcpy(buffer+(1*sizeof(uint8_t))+(2*sizeof(uint8_t))+(4*flag*sizeof(uint8_t)),&payload,sizeof(uint16_t));//bytes 3 and 4
+						flag++;
+						
+					}
+					else
+						continue;
+
+
+				}
+  			REST.set_response_payload(response, buffer, 1+(flag)*4);
+			}
+			else{
+				REST.set_header_content_type(response, REST.type.TEXT_PLAIN);
+				REST.set_response_payload(response, buffer, 0);
+			}
+
+			ENERGEST_OFF(ENERGEST_TYPE_SENSORS);
+		#endif
+
 
 	#endif
-	*/
-
-	memcpy(buffer,&fixed_header,sizeof(uint8_t));
 
 
-
-  	REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
-  	REST.set_response_payload(response, buffer, 1);
-  	/*reset has to be after operations to not alter values between for loops*/
+	
   	reset_payloads();
 
   	/*This buffer print has data from other transmissions*/
   	#if RES_DEBUG
-  	//printf("TRANSMISSION COUNT=%d  BUFFER=%s(len-%d)\n",trans_count,buffer,strlen(test));
-  	printf("BUFFER=%u(%u) total trans=%d\n",buffer,fixed_header,trans_count);
+  	  	printf("BUFFER=%u total trans=%d\n",buffer,trans_count);
 	#endif
 
-  	trans_count++;
 }
 
 static void
@@ -130,70 +194,5 @@ res_periodic_handler(){
     /* Notify the registered observers which will trigger the res_get_handler to create the response. */
     REST.notify_subscribers(&res_densenet);
   }
-}
-void 
-payloadConcat(char * test){
-
-	int i, total=0;
-	for(i=0;i<get_num_payloads();i=i+1){
-    	total+=snprintf(test+total,(LEN_SINGLE_PAYLOAD*MAX_N_PAYLOADS)-total,"%u",get_payloadAt(i));
-
-    	//printf("test=%s\n",test );
-	}
-
-
-}
-
-void 
-maxPayload(char * test, unsigned int current){
-
-	int i=0;
-	unsigned int max=current;/*my number is the max value*/
-	unsigned int temp=0;
-
-	for(i=0;i<get_num_payloads();i=i+1){
-		
-		temp=get_payloadAt(i);
-		
-		if(max < temp )
-			max = temp;
-
-	}
-	sprintf(test,"%u",max);
-
-}
-void 
-minPayload(char * test,unsigned int current){
-	
-	int i=0;
-	unsigned int min=current;
-	unsigned int temp=0;
-
-	for(i=0;i<get_num_payloads();i=i+1){
-		
-		temp=get_payloadAt(i);
-
-		if(min > temp )
-			min = temp;
-
-
-	}
-	sprintf(test,"%u",min);
-}
-void 
-avgPayload(char * test,unsigned int current){
-
-	int i=0;
-	unsigned int number=current;
-	printf("num1=%d\n",current );
-
-	for(i=0;i<get_num_payloads();i=i+1){
-		
-		number += get_payloadAt(i);
-	}
-	printf("number=%u\n",number );
-	number=number/(i+1);
-	sprintf(test,"%u",number);
-
 }
 /*---------------------------------------------------------------------------*/
