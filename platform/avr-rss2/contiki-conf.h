@@ -46,20 +46,20 @@
 #endif
 
 /*DENSENET AGGREGATION*/
-#define NODE_ID 1 /*if node =1 the output is sent to uart0 in contiki-main*/
-#define PRODUCER 0 // a producer creates data to agregate
+#define NODE_ID 3 /*if node =1 the output is sent to uart0 in contiki-main*/
+#define PRODUCER 1 // a producer creates data to agregate
 #define DENSENET 1	/*necessary to add observer*/
 #define DEBUG_DENSENET 0
-#define PLATFORM_HAS_AGGREGATION 1
+#define PLATFORM_HAS_AGGREGATION 0
 #define MAX_N_PAYLOADS 5	/*this value should equal to the number of max existing groups*/
 #define WARMUP_DISCARD 240 /*discard first x seconds from energest*/
 #define ENERGEST_UPDATE 4 /*time interval that takes the platform to update the energest values, rtimer_second 7812 (timeout at 8 seconds)*/
-#define SEND_INTERVAL 120 /*control the time interval to send CoAP Packets, only available in NODE != 1*/
+#define SEND_INTERVAL 5 /*control the time interval to send CoAP Packets, only available in NODE != 1*/
 #define FATHER_NODE "fe80:0000:0000:0000:fec2:3d00:0000:0001"
 /***END DENSENET***/
 /*Header variables*/
 #define EXTERNAL_CONCAT			1
-#define GROUPID 				0
+#define GROUPID 				1
 #define AGG_FUNCTION	AGG_AVG_FUNC
 
 

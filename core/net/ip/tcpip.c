@@ -222,7 +222,7 @@ packet_input(void)
 
     /*densenet*/
     // length between the limits and not my address
-    if((uip_len>55 && uip_len<=110) && !uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr) ){
+    if(( uip_len > 55 ) && !uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr) ){
       //printf("uip_len=%d && source=",uip_len);
     
       #if PLATFORM_HAS_AGGREGATION
