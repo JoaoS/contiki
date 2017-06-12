@@ -42,6 +42,8 @@ extern unsigned long totalRecSize;
 extern unsigned long totalRecCoap;
 extern unsigned long totalRecCoapSize;
 
+extern unsigned long nrparsedpacotes;
+
 #include "contiki-version.h"
 #include "contiki-conf.h"
 #include "contiki-default-conf.h"

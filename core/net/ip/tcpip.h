@@ -91,6 +91,7 @@ void tcpip_uipcall(void);
 #if PLATFORM_HAS_AGGREGATION   
 void doAggregation(void);
 #endif
+
 /**
  * \name TCP functions
  * @{

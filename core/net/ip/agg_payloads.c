@@ -14,7 +14,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 static aggPayloads PayloadList = {0};
 
 //The first call to this function is when a packet is produced, so it initializes at 0
@@ -106,21 +105,32 @@ void save_to_buffer(uint8_t * payload, int nr_payloads){
 		agg_function = (var & AGG_FUNCTION_MASK)>>AGG_FUNCTION_POSITION;
 		var= payload[i+1];
 		total_num=(var & NRVALUES_MASK) >> NRVALUES_POSITION;
+		
+
 		//the order of payload is inverted, the endianess is different
 		var= payload[i+2];
 		payload_val = (var & PAYLOAD_MASK);
 		var = payload[i+3];
 		payload_val |= (var & PAYLOAD_MASK) << 8;
-		printf("group id =%u\n",groupid);
-
+		
+		#if DEBUG_DENSENET
+			printf("group id =%u\n",groupid);
+		#endif
 
 		/*insert the data in the buffer, check first if it has data inside*/
 		if(PayloadList.singleP[groupid].flag){
 
 			PayloadList.singleP[groupid].total_num = PayloadList.singleP[groupid].total_num+total_num;
-			
+			//printf("nr pacotes=%u\n",PayloadList.singleP[groupid].total_num );
+
 			if(agg_function==0){minPayload(PayloadList.singleP[groupid].value , payload_val);}
-			else if(agg_function==1){avgPayload(PayloadList.singleP[groupid].value , payload_val);printf("resultado=%u\n",avgPayload(PayloadList.singleP[groupid].value , payload_val) );}
+			else if(agg_function==1)
+			{
+				avgPayload(PayloadList.singleP[groupid].value , payload_val);
+				#if DEBUG_DENSENET
+					printf("resultado=%u\n",avgPayload(PayloadList.singleP[groupid].value , payload_val));
+				#endif
+			}
 			else if(agg_function==2){maxPayload(PayloadList.singleP[groupid].value , payload_val);}
 		}
 		else{	
@@ -149,3 +159,29 @@ uint16_t maxPayload(uint16_t saved ,uint16_t current){
 	return saved > current ? saved : current;
 }
 /********************************************/
+
+
+uint8_t count_packets(uint8_t * payload){
+
+	uint8_t	nr_payloads = (FIX_AGG_HEADER_NRPAYLOADS_MASK & * payload) >>FIX_AGG_HEADER_NRPAYLOADS_POSITION;
+	int i=1; //skip header
+	uint8_t var, groupid, total_num;
+	total_num=0;
+
+	//go through every packet and add it to the buffer according to the agg function
+	for (; i <= nr_payloads*4; i=i+4)
+	{	
+
+		var=groupid=total_num=0;
+
+		var= payload[i];
+		groupid = (var & GROUPID_MASK) >> GROUPID_POSITION;
+		var= payload[i+1];
+		total_num=(var & NRVALUES_MASK) >> NRVALUES_POSITION;
+		break;
+	}
+	return total_num;
+
+
+
+}

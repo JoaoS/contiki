@@ -51,7 +51,7 @@
 /*subtil*/
 #include "sys/clock.h"
 
-#define RES_DEBUG 1
+#define RES_DEBUG 0
 #define N_VALUES 3 //number of uint8_t elements of packets, 1 fixed +2 information and 2(uint16_t) for the payload
 
 
@@ -104,7 +104,6 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 
 		var=0;
 		var |= 1 << NRVALUES_POSITION;
-		var |= 0 << UNIT_RESERVED_POSITION;
 		my_packet[2] = var;
 
 		payload=trans_count;//the actual payload value
@@ -135,18 +134,20 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 			{
 				for (; i < MAX_N_PAYLOADS; ++i)
 				{
-
 					singlePayload * iterator=ask_list(i);
 					if (iterator->flag)
 					{
 						//create unit
-						printf(" iteration number=%d\n",i);
+						//printf(" iteration number=%d\n",i);
 						byte_one=byte_two=0;
 
 						byte_one |= (iterator->groupID) << GROUPID_POSITION;
 						byte_one |= (iterator->agg_function) << AGG_FUNCTION_POSITION;
 						
 						byte_two |= (iterator->total_num) << NRVALUES_POSITION;
+						#if 1
+							printf("\nnr de valores-res/densenet=%u, iterador=%u\n",byte_two,(iterator->total_num) );
+						#endif
 
 						payload=(iterator->value);
 
@@ -158,8 +159,6 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 					}
 					else
 						continue;
-
-
 				}
   			REST.set_response_payload(response, buffer, 1+(flag)*4);
 			}
@@ -167,11 +166,8 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 				REST.set_header_content_type(response, REST.type.TEXT_PLAIN);
 				REST.set_response_payload(response, buffer, 0);
 			}
-
 			ENERGEST_OFF(ENERGEST_TYPE_SENSORS);
 		#endif
-
-
 	#endif
 
 

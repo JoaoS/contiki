@@ -571,6 +571,7 @@ main(void)
             totalRec=0;
             totalRecSize=0;
             totalRecCoapSize=0;
+            nrparsedpacotes=0;
           }
         }
         else{
@@ -592,7 +593,7 @@ main(void)
 #include "lib/print-stats.h"
         print_stats();
         printf("totalTrans=%lu, totalTranSsize=%lu,totalRec=%lu, totalRecSsize=%lu\n",totalTrans,totalTransSize,totalRec,totalRecSize );
-        printf("totalrecCoap=%lu, totalrecCoapSize=%lu\n",totalRecCoap,totalRecCoapSize );
+        printf("totalrecCoap=%lu, totalrecCoapSize=%lu, parsed packets=%lu\n",totalRecCoap,totalRecCoapSize,nrparsedpacotes );
 
 #elif RADIOSTATS
         extern volatile unsigned long radioontime;

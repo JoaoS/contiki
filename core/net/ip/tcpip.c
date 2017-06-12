@@ -53,7 +53,7 @@
 #include "net/rpl/rpl-private.h"
 #endif
 
-#if PLATFORM_HAS_AGGREGATION  
+#if PLATFORM_HAS_AGGREGATION  || NODE_ID==1
 #include "net/ip/agg_payloads.h"
 #include "apps/er-coap/er-coap.h"
 #include "apps/rest-engine/rest-engine.h"
@@ -61,8 +61,13 @@
 #endif
 unsigned long totalRecCoap=0;
 unsigned long totalRecCoapSize=0;
+unsigned long nrparsedpacotes=0;
+
+
 /*printing this function will fill fill the receive/send buffers with junk! but why?*/
 static void print_ipv6_addr(const uip_ipaddr_t *ip_addr);
+void print_num(void);
+
 
 
 #include <string.h>
@@ -225,6 +230,13 @@ packet_input(void)
     if(( uip_len > 55 ) && !uip_ds6_is_my_addr(&UIP_IP_BUF->srcipaddr) ){
       //printf("uip_len=%d && source=",uip_len);
     
+     #if NODE_ID == 1
+        ENERGEST_ON(ENERGEST_TYPE_LED_GREEN);
+        print_num();
+        ENERGEST_OFF(ENERGEST_TYPE_LED_GREEN);
+      #endif
+
+
       #if PLATFORM_HAS_AGGREGATION
       ENERGEST_ON(ENERGEST_TYPE_SENSORS);
         doAggregation();
@@ -238,6 +250,7 @@ packet_input(void)
         totalRecCoapSize+=uip_len-8; /*the uip buffer has 8 more bytes, so discard them*/
 
       #endif
+
 
 
     }
@@ -916,7 +929,19 @@ void doAggregation(void){
     } 
 }
 #endif
+#if NODE_ID==1
+void print_num(void){
 
+ 
+    static coap_packet_t coap_pt[1];    //allocate space for 1 packet
+    unsigned int begin_payload_index=UIP_IPUDPH_LEN+8;  // For some reason the forwarded packet has 8 more bytes
+    coap_parse_message(coap_pt, &uip_buf[begin_payload_index], uip_datalen());
+    //printf("Parsing: coap_code  is %d, version is %d \n", coap_pt->code,coap_pt->version);
+    if(coap_pt->code==69 && coap_pt->version ==1){
+      nrparsedpacotes += count_packets(coap_pt->payload);
+    } 
+}
+#endif
 static void
 print_ipv6_addr(const uip_ipaddr_t *ip_addr) {
     int i;

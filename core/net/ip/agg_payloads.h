@@ -57,3 +57,4 @@ uint16_t avgPayload(uint16_t saved ,uint16_t current);
 uint16_t maxPayload(uint16_t saved ,uint16_t current);
 
 
+uint8_t count_packets(uint8_t * payload);
